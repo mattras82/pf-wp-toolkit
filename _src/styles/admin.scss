@@ -1,0 +1,25 @@
+@import "mixins";
+
+.pfwp-customize {
+  &-control {
+    float: none;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+
+    &:not(.pfwp-customize-control-select2){
+      overflow: hidden;
+    }
+  }
+
+  @import "customizer/accordion";
+  @import "customizer/range-slider";
+  @import "customizer/switch";
+  @import "customizer/layout";
+}
+
+[id*="pf-metabox"] {
+  @import "metaboxer/quick-box";
+  @import "metaboxer/image-quick-box";
+  @import "metaboxer/tabs";
+}

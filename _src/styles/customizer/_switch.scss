@@ -1,0 +1,116 @@
+&-switch-wrap {
+  display: block;
+  padding: 10px 0;
+  @include clearfix;
+
+  &, *, *:after, *:before {
+    box-sizing: border-box;
+  }
+
+  label {
+    display: block;
+    @include clearfix;
+    > span {
+      float: left;
+    }
+  }
+
+  .customize-control-title {
+    padding-left: 12px;
+    margin: 0;
+    font-weight: normal;
+  }
+
+  .switch {
+    height: 26px;
+    width: 55px;
+    position: relative;
+    display: block;
+
+    input {
+      cursor: pointer;
+      height: 100%;
+      opacity: 0;
+      position: absolute;
+      width: 100%;
+      z-index: 100;
+      margin: 0;
+
+      &:checked {
+        & ~ .switch-bg {
+          background: #2fca6c;
+          color: #138a43;
+
+          .switch-handle {
+            left: 27px;
+          }
+        }
+      }
+    }
+
+    &-bg {
+      background: #e9513a;
+      color: #a52918;
+      border-radius: 3px;
+      display: block;
+      height: 100%;
+      position: relative;
+      transition: all .15s ease;
+      width: 100%;
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: inset 0 1px 0 rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.9);
+    }
+
+    &-handle {
+      background: #fefefe;
+      border-radius: 2px;
+      display: block;
+      height: 20px;
+      width: 24px;
+
+      position: absolute;
+      left: 3px;
+      top: 2px;
+
+      box-shadow: 0 1px 0 rgba(0,0,0,0.3), inset 0 1px rgba(255,255,255,0.9);
+
+      transition: all .15s ease;
+      z-index: 3;
+
+      &:before {
+        background: #d3d3d3;
+        bottom: 0;
+        box-shadow: -3px 0 0 0 #d3d3d3,
+        3px 0 0 0 #d3d3d3;
+        content: '';
+        display: block;
+        height: 10px;
+        left: 0;
+        margin: auto;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: all .15s ease;
+        width: 1px;
+      }
+    }
+
+    &-on, &-off {
+      font-size: 10px;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.2);
+
+      position: relative;
+      top: 2px;
+      z-index: 2;
+    }
+
+    &-on {
+      left: 6px;
+    }
+
+    &-off {
+      left: 13px;
+    }
+  }
+}
