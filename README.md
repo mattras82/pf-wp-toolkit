@@ -6,5 +6,8 @@
 
 ## Changelog ##
 
+### v.1.0.1
+- Admin media uploader text bug fix
+
 ### v.1.0.0
 - Initializing plugin

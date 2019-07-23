@@ -19,7 +19,7 @@ function meta_upload() {
       uploader.opts.button.text = 'Select Media';
       uploader.opts.library = null;
     } else {
-      if (mediaLabel.indexOf('/')) mediaLabel = mediaLabel.substr(mediaLabel.indexOf('/') + 1, mediaLabel.length).toUpperCase();
+      if (mediaLabel.indexOf('/') > 0) mediaLabel = mediaLabel.substr(mediaLabel.indexOf('/') + 1, mediaLabel.length).toUpperCase();
       uploader.opts.title = `Select ${mediaLabel}`;
       uploader.opts.button.text = `Select ${mediaLabel}`;
       uploader.opts.library.type = mediaType;

@@ -1,6 +1,6 @@
 {
   "name": "publicfunction-wordpress-toolkit",
-  "version": "2019.5.31",
+  "version": "1.0.1",
   "description": "PublicFunction's WordPress Toolkit Plugin",
   "private": true,
   "dependencies": {
@@ -48,6 +48,6 @@
     "last 1 ChromeAndroid version",
     "ie 11"
   ],
-  "author": "",
+  "author": "mattras82",
   "license": "MIT"
 }
