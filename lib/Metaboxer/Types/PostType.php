@@ -14,6 +14,24 @@ class PostType extends SelectType
      */
     protected $post_type;
 
+    /**
+     * Order By string for WP Query
+     * @var string
+     */
+    protected $orderby = 'post_title';
+
+    /**
+     * Order string for WP Query
+     * @var string
+     */
+    protected $order = 'ASC';
+
+    /**
+     * Associative array object for the WP_Query to generate the posts
+     * @var array
+     */
+    protected $query = [];
+
     public function __construct($args)
     {
         parent::__construct($args);
@@ -26,14 +44,20 @@ class PostType extends SelectType
      */
     public function set_children()
     {
-        $args = [
-            'post_type' => $this->post_type,
-            'nopaging' => true,
-            'orderby'   => 'post_title',
-            'order'     => 'ASC'
-        ];
+        if (empty($this->query)) {
+            $this->query = [
+                'post_type' => $this->post_type,
+                'nopaging'  => true,
+                'orderby'   => $this->orderby,
+                'order'     => $this->order
+            ];
+        } elseif (!isset($this->query['post_type'])) {
+            $this->query['post_type'] = $this->post_type;
+            $this->query['orderby'] = isset($this->query['orderby']) ? $this->query['orderby'] : $this->orderby;
+            $this->query['order'] = isset($this->query['order']) ? $this->query['order'] : $this->order;
+        }
 
-        $post_query = new WP_Query($args);
+        $post_query = new WP_Query($this->query);
 
         $this->children = (!empty($post_query->posts) ? $post_query->posts : []);
     }

@@ -14,6 +14,12 @@ class CheckboxesType extends BaseType
     protected $options;
 
     /**
+     * Holds the name of a function that will return the array of options for this input
+     * @var string
+     */
+    protected $optionsFunction;
+
+    /**
      * Holds the type class of each option (checkbox, radio, etc)
      * @var BaseType
      */
@@ -34,6 +40,10 @@ class CheckboxesType extends BaseType
     public function __construct($args)
     {
         parent::__construct($args);
+
+        if (isset($this->optionsFunction) && is_callable($this->optionsFunction)) {
+            $this->options = call_user_func($this->optionsFunction);
+        }
 
         $this->set_child_types();
         $this->set_children();

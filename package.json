@@ -1,6 +1,6 @@
 {
   "name": "publicfunction-wordpress-toolkit",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "PublicFunction's WordPress Toolkit Plugin",
   "private": true,
   "dependencies": {
