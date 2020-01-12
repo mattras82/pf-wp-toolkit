@@ -8,6 +8,7 @@ module.exports = {
   plugins: [
     new CopyWebpackPlugin([
       { from: './node_modules/jquery/dist/jquery.min.js' },
+      { from: './node_modules/jquery-migrate/dist/jquery-migrate.min.js' },
     ])
   ]
 };

@@ -23,3 +23,20 @@
   @import "metaboxer/image-quick-box";
   @import "metaboxer/tabs";
 }
+
+html.wysiwyg-fix {
+  overflow-y: scroll;
+}
+
+.edit-post-meta-boxes-area .postbox {
+
+  .handlediv {
+    position: absolute;
+    right: 0;
+  }
+
+  .no-sort {
+    cursor: pointer !important;
+  }
+}
+

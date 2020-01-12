@@ -67,23 +67,26 @@ if (!function_exists('pf_get_option')) {
     /**
      * Returns the value of a theme option by group and key or dot notation
      * @param null|string $path
+     * @param string $filter
      * @return null|mixed
      */
-    function pf_get_option($path) {
+    function pf_get_option($path, $filter = '') {
         if(!pf_toolkit('use_customizer'))
             return null;
 
-        return pf_toolkit('customizer')->option($path);
+        return apply_filters($filter, pf_toolkit('customizer')->option($path));
     }
 }
 
 if (!function_exists('pf_option')) {
-    /**
-     * Prints out an option by group and key or dot-notation
-     * @param null $path
-     */
-    function pf_option($path) {
-        echo pf_get_option($path);
+	/**
+	 * Prints out an option by group and key or dot-notation
+	 * @param string $path
+	 * @param string $filter
+	 * @return void
+	 */
+    function pf_option($path, $filter = '') {
+        echo pf_get_option($path, $filter);
     }
 }
 
