@@ -83,8 +83,6 @@ abstract class MetaboxAbstract extends RunableAbstract
         // display method
         $this->callback = [$this, 'display'];
 
-        // When extending this abstract, setup needs to be overridden and
-        // used to set the sub class/metabox
         $this->setup();
     }
 
@@ -414,5 +412,6 @@ abstract class MetaboxAbstract extends RunableAbstract
         }
         $this->loader()->addAction('admin_head', [$this, 'loadHead']);
         $this->loader()->addAction('save_post', [$this, 'save']);
+        $this->loader()->addAction('after_setup_theme', [$this, 'setupFields']);
     }
 }

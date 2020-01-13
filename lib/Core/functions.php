@@ -64,7 +64,7 @@ if (!function_exists('pf_get_partial')) {
             $templates[] = "{$prefix}/{$path}-{$variant}.php";
 
             if (!empty($parent_prefix))
-                $templates = "{$parent_prefix}/{$path}-{$variant}.php";
+                $templates[] = "{$parent_prefix}/{$path}-{$variant}.php";
         }
 
         $templates[] = "{$prefix}/{$path}.php";

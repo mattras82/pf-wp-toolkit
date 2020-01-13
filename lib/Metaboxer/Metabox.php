@@ -75,21 +75,6 @@ class Metabox extends MetaboxAbstract
                     $this->{$property}($value);
                 elseif(property_exists($this, $property))
                     $this->{$property} = $value;
-
-                if($property == 'fields') {
-                    $helper = new Helpers();
-                    foreach($value as $field_key => $field) {
-                        $this->defaults[$field_key] = isset($field['default']) ? $helper->shortcodeOrCallback($field['default']) : '';
-                        if(array_key_exists($field['type'], $this->type_classes)) {
-                            $field['id'] = $this->get_html_id($field_key);
-                            $field['name'] = $this->get_input_name($field_key);
-                            $field['key'] = $field_key;
-                            $this->fields[$field_key] = new $this->type_classes[$field['type']]($field);
-                            if ($field['type'] === 'image') $this->defaults[$field_key.'_id'] = '';
-                            if ($this->use_single_keys && $field['type'] === 'gallery') $this->defaults[$field_key.'_data'] = '';
-                        }
-                    }
-                }
             }
 
             // Save the instance
@@ -104,6 +89,27 @@ class Metabox extends MetaboxAbstract
         }
 
         return $this;
+    }
+
+	/**
+	 * We run this function after the theme has been initialized in case any callbacks are defined in the functions.php file
+	 * @return void
+	 */
+    public function setupFields() {
+    	if ($this->fields) {
+		    $helper = new Helpers();
+		    foreach($this->fields as $field_key => $field) {
+			    $this->defaults[$field_key] = isset($field['default']) ? $helper->shortcodeOrCallback($field['default']) : '';
+			    if(array_key_exists($field['type'], $this->type_classes)) {
+				    $field['id'] = $this->get_html_id($field_key);
+				    $field['name'] = $this->get_input_name($field_key);
+				    $field['key'] = $field_key;
+				    $this->fields[$field_key] = new $this->type_classes[$field['type']]($field);
+				    if ($field['type'] === 'image') $this->defaults[$field_key.'_id'] = '';
+				    if ($this->use_single_keys && $field['type'] === 'gallery') $this->defaults[$field_key.'_data'] = '';
+			    }
+		    }
+	    }
     }
 
     /**
