@@ -25,6 +25,10 @@ class CheckboxType extends BaseType
 
         if (!$this->value)
             $this->value = 'on';
+
+        if ($this->type === 'radio') {
+            $this->field_attr['type'] = 'checkbox';
+        }
     }
 
     /**

@@ -11,7 +11,7 @@ class RestAPI extends RunableAbstract
 
     protected $endpoints;
 
-    public function __construct(Container $c)
+    public function __construct(Container &$c)
     {
         parent::__construct($c);
 

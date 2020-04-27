@@ -66,7 +66,7 @@ if (!function_exists('pf_fieldset_social')) {
 if (!function_exists('pf_get_option')) {
     /**
      * Returns the value of a theme option by group and key or dot notation
-     * @param null|string $path
+     * @param string $path
      * @param string $filter
      * @return null|mixed
      */
@@ -78,13 +78,31 @@ if (!function_exists('pf_get_option')) {
     }
 }
 
-if (!function_exists('pf_option')) {
+if (!function_exists('pf_lazy_option') && function_exists('pf_lazy_attachment_image')) {
 	/**
-	 * Prints out an option by group and key or dot-notation
+	 * Prints out the lazy load markup for an image in the Customizer
 	 * @param string $path
-	 * @param string $filter
+	 * @param string $size
+	 * @param array $atts
 	 * @return void
 	 */
+	function pf_lazy_option($path, $size = 'full', $atts = []) {
+		$img = pf_get_option($path);
+		if ($id = attachment_url_to_postid($img)) {
+			pf_lazy_attachment_image($id, $size, $atts);
+		} else {
+			pf_lazy_image($img, '', $atts);
+		}
+	}
+}
+
+if (!function_exists('pf_option')) {
+    /**
+     * Prints out an option by group and key or dot-notation
+     * @param string $path
+     * @param string $filter
+     * @return void
+     */
     function pf_option($path, $filter = '') {
         echo pf_get_option($path, $filter);
     }
@@ -106,7 +124,7 @@ if (!function_exists('pf_option_enabled')) {
 if (!function_exists('pf_get_social')) {
     /**
      * Returns an array of enabled social icons
-     * @return \PublicFunction\Assets\SocialIcon[]
+     * @return \PublicFunction\Toolkit\Assets\SocialIcon[]
      */
     function pf_get_social() {
         $option = pf_get_option('social');

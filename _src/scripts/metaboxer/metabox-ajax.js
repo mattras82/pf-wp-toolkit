@@ -55,8 +55,9 @@ $(document).ready(function() {
   $('[id*="pf-metabox"]').on('click', '[data-gallery-id-add]', function() {
     let id = $(this).data('gallery-id-add');
     let num = $('#'+id).val();
-    if (num == 9) {
-      alert('You have reached the maximum number of panels.');
+    let max = this.dataset.galleryMax || 10;
+    if (num == max) {
+      alert('You have reached the maximum number of items.');
       return false;
     }
     num++;

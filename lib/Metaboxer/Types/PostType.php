@@ -65,39 +65,14 @@ class PostType extends SelectType
     /**
      * @inheritdoc
      */
-    public function display_field($meta = [])
-    {
-        echo $this->display_field_wrap();
-
-        if ($this->label)
-            echo Markup::tag('label', ['class' => ['field-label', 'field-label-' . $this->type]], $this->label);
-
-        $options = '';
-        if ($this->placeholder)
-            $options .= Markup::tag('option', ['disabled' => 'disabled', 'selected' => 'selected'], $this->placeholder);
-
-        foreach($this->children as $child) {
-            $attr = [
-                'value' => $child->ID
-            ];
-            if ((isset($meta[$this->key]) && $meta[$this->key] == $child->ID) || $this->default == $child->ID) {
-                $attr['selected'] = 'selected';
-            }
-            $options .= Markup::tag('option', $attr, $child->post_title);
+    public function get_child_markup($child, $meta) {
+        $attr = [
+            'value' => $child->ID
+        ];
+        if ((isset($meta[$this->key]) && $meta[$this->key] == $child->ID) || (!isset($meta[$this->key]) && $this->default == $child->ID)) {
+            $attr['selected'] = 'selected';
         }
-
-        unset($this->field_attr['value']);
-        unset($this->field_attr['type']);
-
-        echo Markup::tag('select', $this->field_attr, $options);
-
-        if($this->description)
-            echo Markup::tag('p', ['class' => 'description'], $this->description);
-
-        echo '</div>';
-
-        return true;
-
+        return Markup::tag('option', $attr, $child->post_title);
     }
 
 }

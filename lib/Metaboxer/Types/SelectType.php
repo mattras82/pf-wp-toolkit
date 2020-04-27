@@ -11,7 +11,7 @@ class SelectType extends CheckboxesType
      * Used to prepend the options list with a disabled option
      * @var string
      */
-    protected $placeholder;
+    protected $placeholder = 'Select an option';
 
     /**
      * @inheritdoc
@@ -42,23 +42,23 @@ class SelectType extends CheckboxesType
             echo Markup::tag('label', ['class' => ['field-label', 'field-label-' . $this->type]], $this->label);
 
         $options = '';
-        if ($this->placeholder)
-            $options .= Markup::tag('option', ['disabled' => 'disabled', 'selected' => 'selected'], $this->placeholder);
-
-        foreach($this->children as $child) {
-            $attr = [
-                'value' => $child['value']
-            ];
-            if ((isset($meta[$this->key]) && $meta[$this->key] == $child['value']) || $this->default == $child['value']) {
-                $attr['selected'] = 'selected';
+        if ($this->placeholder) {
+            $atts = ['value' => ''];
+            if ($this->required) {
+                $atts['disabled'] = 'disabled';
+                $atts['selected'] = 'selected';
             }
-            $options .= Markup::tag('option', $attr, $child['label']);
+            $options .= Markup::tag('option', $atts, $this->placeholder);
         }
 
-        echo Markup::tag('select', [
-            'id' => $this->id,
-            'name' => $this->name
-        ], $options);
+        foreach($this->children as $child) {
+            $options .= $this->get_child_markup($child, $meta);
+        }
+
+        unset($this->field_attr['value']);
+        unset($this->field_attr['type']);
+
+        echo Markup::tag('select', $this->field_attr, $options);
 
         if($this->description)
             echo Markup::tag('p', ['class' => 'description'], $this->description);
@@ -67,6 +67,24 @@ class SelectType extends CheckboxesType
 
         return true;
 
+    }
+
+
+    /**
+     * Generates the HTML markup string for the given child option
+     *
+     * @param  array $child The child object to render
+     * @param  array $meta The meta values for the current post
+     * @return string The HTML markup for the child
+     */
+    public function get_child_markup($child, $meta) {
+        $attr = [
+            'value' => $child['value']
+        ];
+        if ((isset($meta[$this->key]) && $meta[$this->key] == $child['value']) || (!isset($meta[$this->key]) && $this->default == $child['value'])) {
+            $attr['selected'] = 'selected';
+        }
+        return Markup::tag('option', $attr, $child['label']);
     }
 
 }

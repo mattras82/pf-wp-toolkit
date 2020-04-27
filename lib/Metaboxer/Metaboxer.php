@@ -31,7 +31,7 @@ class Metaboxer extends RunableAbstract
 
     protected $helper;
 
-    public function __construct(Container $c)
+    public function __construct(Container &$c)
     {
         require_once trailingslashit(__DIR__) . 'functions.php';
         parent::__construct($c);
@@ -98,6 +98,7 @@ class Metaboxer extends RunableAbstract
                             if (is_string($field['fields'])) {
                                 $field['fields'] = $this->helper->shortcodeOrCallback($field['fields']);
                             }
+
                             foreach ($field['fields'] as $gid => $gfield) {
                                 $field['fields'][$gid] = isset($gfield['default']) ? $this->helper->shortcodeOrCallback($gfield['default']) : '';
                                 if ($gfield['type'] === 'image') $field['fields'][$gid.'_id'] = '';
@@ -165,13 +166,13 @@ class Metaboxer extends RunableAbstract
                             while ($i < $count) {
                                 $metaValue[$i] = array();
                                 foreach ($value['fields'] as $field_key => $field) {
-                                    $default = (isset($field['default']) ? $field['default'] : '');
+                                    $default = is_string($field) ? $field : (isset($field['default']) ? $field['default'] : '');
                                     if (substr($field_key, -3) === '_id') { // Image ID field
                                         $image_key = substr($field_key, 0, -3);
                                         if ($this->metaboxes[$bid]->is_single()) {
-                                            $fieldValue = isset($meta[$bid.'_meta_'.$key.'_data'][$image_key.'_'.$i]) ? $meta[$bid.'_meta_'.$key.'_data'][$image_key.'_'.$i] : $default;
+                                            $fieldValue = isset($meta[$bid.'_meta_'.$key.'_data'][$image_key.'_'.$i.'_id']) ? $meta[$bid.'_meta_'.$key.'_data'][$image_key.'_'.$i.'_id'] : $default;
                                         } else {
-                                            $fieldValue = isset($meta[$bid.'_meta'][$key.'_'.$image_key.'_'.$i]) ? $meta[$bid.'_meta'][$key.'_'.$image_key.'_'.$i] : $default;
+                                            $fieldValue = isset($meta[$bid.'_meta'][$key.'_'.$image_key.'_'.$i.'_id']) ? $meta[$bid.'_meta'][$key.'_'.$image_key.'_'.$i.'_id'] : $default;
                                         }
                                     } else {
                                         if ($this->metaboxes[$bid]->is_single()) {

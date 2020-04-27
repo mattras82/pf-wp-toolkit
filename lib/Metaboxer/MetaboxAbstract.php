@@ -75,14 +75,13 @@ abstract class MetaboxAbstract extends RunableAbstract
      */
     protected $storage_name = 'metabox';
 
-    public function __construct(\PublicFunction\Toolkit\Core\Container $container)
+    public function __construct(\PublicFunction\Toolkit\Core\Container &$container)
     {
         parent::__construct($container);
 
         // by default, all callbacks are set to the abstract
         // display method
         $this->callback = [$this, 'display'];
-
         $this->setup();
     }
 
@@ -412,6 +411,5 @@ abstract class MetaboxAbstract extends RunableAbstract
         }
         $this->loader()->addAction('admin_head', [$this, 'loadHead']);
         $this->loader()->addAction('save_post', [$this, 'save']);
-        $this->loader()->addAction('after_setup_theme', [$this, 'setupFields']);
     }
 }

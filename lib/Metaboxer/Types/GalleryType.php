@@ -32,6 +32,12 @@ class GalleryType extends BaseType
      */
     protected $button_text;
 
+	/**
+	 * Optional field that tells the JavaScript how many items this gallery supports
+	 * @var int
+	 */
+	protected $max_items = 10;
+
     /**
      * Sets the amount of gallery items as fixed. Removes the buttons to add/remove items.
      * @var bool
@@ -122,7 +128,7 @@ class GalleryType extends BaseType
             echo Markup::tag('p', ['class' => 'description'], $this->description);
 
         if (!$this->fixed)
-            echo '<a class="button" href="javascript:void(0)" data-gallery-id-add="'.$this->id.'">Add a '.$this->button_text.'</a>';
+            echo '<a class="button" href="javascript:void(0)" data-gallery-max="' . $this->max_items .'" data-gallery-id-add="'.$this->id.'">Add a '.$this->button_text.'</a>';
 
         echo '<ul class="tabs" data-pf-tabs id="'.$this->id.'-tabs">';
         foreach ($this->get_numbers() as $i => $num) {

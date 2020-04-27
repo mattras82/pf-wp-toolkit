@@ -9,6 +9,7 @@ use PublicFunction\Toolkit\Setup\JsonConfig;
 use PublicFunction\Toolkit\Core\Loader;
 use PublicFunction\Toolkit\Core\SingletonTrait;
 use PublicFunction\Toolkit\Setup\ScriptsAndStyles;
+use PublicFunction\Toolkit\Setup\SEO;
 
 class Plugin
 {
@@ -52,7 +53,7 @@ class Plugin
                 'short_name' => 'pf-wp-toolkit',
                 'directory' => $_plugin_dir,
                 'path' => $_plugin_path,
-                'version' => '1.0.4',
+                'version' => '1.0.5',
                 'config_path' => $_plugin_path . 'config/',
 
                 // Asset paths and directories
@@ -121,6 +122,10 @@ class Plugin
                 return new Loader();
             },
 
+            'seo' => function(Container &$c) {
+                return new SEO($c);
+            },
+
             'rest_api' => function (Container &$c) {
 	            return new RestAPI($c);
             },
@@ -162,15 +167,22 @@ class Plugin
             },
 
             'front_end_assets' => function (Container &$c) {
-	            if ($c->get('toolkit.lazy_images')) {
+	            if ($c->get('toolkit.lazy_load')) {
                     $assets = new ScriptsAndStyles($c);
 
-                    // Scripts
-                    $assets->script('lazy_images', $c->get('plugin.assets.dir') . 'lazy-images.js', null, $c->get('plugin.version'));
+                    $assets->style('lazy_media', $c->get('plugin.assets.dir') . 'lazy-media.css', null, $c->get('plugin.version'));
+                    $assets->script('lazy_media', $c->get('plugin.assets.dir') . 'lazy-media.js', null, $c->get('plugin.version'));
                     return $assets;
                 }
 	            return null;
             },
+
+		    'toolkit' => [
+		    	'lazy_load' => !isset($this->config['toolkit']) ? false :
+				    (isset($this->config['toolkit']['lazy_load']) ? $this->config['toolkit']['lazy_load'] :
+					    (isset($this->config['toolkit']['lazy_images']) ? $this->config['toolkit']['lazy_images'] : false)
+				    )
+		    ],
 
             'use_jquery_migrate'    => $this->config['use_jquery_migrate']
         ]);

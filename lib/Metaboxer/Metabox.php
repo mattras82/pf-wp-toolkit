@@ -58,59 +58,59 @@ class Metabox extends MetaboxAbstract
      * registers the metabox with the plugin's container
      * @return Metabox
      */
-    public function setup()
-    {
-        // Grab the already registered quick metaboxes so we can add to the array. if empty,
-        // create new array
-        $metaboxes = $this->registeredMetaboxes();
+	public function setup()
+	{
+		// Grab the already registered quick metaboxes so we can add to the array. if empty,
+		// create new array
+		$metaboxes = $this->registeredMetaboxes();
 
-        if(!$this->registered) {
+		if(!$this->registered) {
 
-            // Go through each property and set them as part of this
-            // class instance
-            foreach($this->args as $property => $value) {
-                if($value === null)
-                    continue;
-                elseif(method_exists($this, $property))
-                    $this->{$property}($value);
-                elseif(property_exists($this, $property))
-                    $this->{$property} = $value;
-            }
+			// Go through each property and set them as part of this
+			// class instance
+			foreach($this->args as $property => $value) {
+				if($value === null)
+					continue;
+				elseif(method_exists($this, $property))
+					$this->{$property}($value);
+				elseif(property_exists($this, $property))
+					$this->{$property} = $value;
+			}
 
-            // Save the instance
-            foreach ((array) $this->post_type as $type) {
-                if(!isset($metaboxes[$type]))
-                    $metaboxes[$type] = [];
+			// Save the instance
+			foreach ((array) $this->post_type as $type) {
+				if(!isset($metaboxes[$type]))
+					$metaboxes[$type] = [];
 
-                $metaboxes[$type][] = $this->metakey;
-            }
-            $this->registered = true;
-            $this->container[$this->storage_name] = $metaboxes;
-        }
+				$metaboxes[$type][] = $this->metakey;
+			}
+			$this->registered = true;
+			$this->container[$this->storage_name] = $metaboxes;
+		}
 
-        return $this;
-    }
+		return $this;
+	}
 
 	/**
-	 * We run this function after the theme has been initialized in case any callbacks are defined in the functions.php file
+	 * We run this function after WP has been loaded in case any callbacks or entities are defined by the theme setup
 	 * @return void
 	 */
-    public function setupFields() {
-    	if ($this->fields) {
-		    $helper = new Helpers();
-		    foreach($this->fields as $field_key => $field) {
-			    $this->defaults[$field_key] = isset($field['default']) ? $helper->shortcodeOrCallback($field['default']) : '';
-			    if(array_key_exists($field['type'], $this->type_classes)) {
-				    $field['id'] = $this->get_html_id($field_key);
-				    $field['name'] = $this->get_input_name($field_key);
-				    $field['key'] = $field_key;
-				    $this->fields[$field_key] = new $this->type_classes[$field['type']]($field);
-				    if ($field['type'] === 'image') $this->defaults[$field_key.'_id'] = '';
-				    if ($this->use_single_keys && $field['type'] === 'gallery') $this->defaults[$field_key.'_data'] = '';
-			    }
-		    }
-	    }
-    }
+	public function setupFields() {
+		if ($this->fields && is_array($this->fields)) {
+			$helper = new Helpers();
+			foreach($this->fields as $field_key => $field) {
+				$this->defaults[$field_key] = isset($field['default']) ? $helper->shortcodeOrCallback($field['default']) : '';
+				if(array_key_exists($field['type'], $this->type_classes)) {
+					$field['id'] = $this->get_html_id($field_key);
+					$field['name'] = $this->get_input_name($field_key);
+					$field['key'] = $field_key;
+					$this->fields[$field_key] = new $this->type_classes[$field['type']]($field);
+					if ($field['type'] === 'image') $this->defaults[$field_key.'_id'] = '';
+					if ($this->use_single_keys && $field['type'] === 'gallery') $this->defaults[$field_key.'_data'] = '';
+				}
+			}
+		}
+	}
 
     /**
      * @inheritdoc
@@ -271,6 +271,7 @@ class Metabox extends MetaboxAbstract
         parent::run();
 
         $this->loader()->addAction('wp_ajax_'.$this->metakey.'_refresh', [$this, 'refresh']);
+	    $this->loader()->addAction('wp_loaded', [$this, 'setupFields']);
     }
 
 }

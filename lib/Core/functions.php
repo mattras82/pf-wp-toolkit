@@ -6,10 +6,11 @@ if (!function_exists('pf_phone_link')) {
      * @param string $phone
      * @return string
      */
-    function pf_phone_link($phone) {
+    function pf_phone_link($phone)
+    {
         $link = '';
         if ($phone) {
-            $link = 'tel:1' . str_replace(['(',')','-',' '], '', $phone);
+            $link = 'tel:1' . str_replace(['(', ')', '-', ' '], '', $phone);
         }
         return $link;
     }
@@ -21,7 +22,8 @@ if (!function_exists('pf_formatted_list')) {
      * @param array $list
      * @return string
      */
-    function pf_formatted_list($list) {
+    function pf_formatted_list($list)
+    {
         if (is_array($list)) {
             // Join all items, except the last, with a comma delimiter and make the string an array
             $main_list = array(join(', ', array_slice($list, 0, -1)));
@@ -124,13 +126,15 @@ if (!function_exists('pf_partial_shortcode')) {
      * @param array $atts
      * @return string
      */
-    function pf_partial_shortcode($atts = []) {
+    function pf_partial_shortcode($atts = [])
+    {
         ob_start();
         if (isset($atts['path']) && !empty($atts['path'])) {
             pf_partial($atts['path']);
         }
         return ob_get_clean();
     }
+
     \PublicFunction\Toolkit\Plugin::getInstance()->shortcode('pf_partial', 'pf_partial_shortcode');
 }
 
@@ -141,7 +145,8 @@ if (!function_exists('pf_post_thumbnail')) {
      * @param array $atts
      * @return string
      */
-    function pf_post_thumbnail($size = 'full', $atts = []) {
+    function pf_post_thumbnail($size = 'full', $atts = [])
+    {
         if (post_password_required() || is_attachment() || !has_post_thumbnail())
             return false;
 
@@ -246,7 +251,8 @@ if (!function_exists('pf_lazy_image')) {
                     list($width, $height) = $image;
                 }
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
 
         if (isset($width)) {
@@ -263,7 +269,12 @@ if (!function_exists('pf_lazy_image')) {
 
         $atts['class'] = isset($atts['class']) ? $atts['class'] .= ' no-js' : 'no-js';
 
-        foreach($atts as $label => $value) {
+        if (!isset($atts['title']) && substr_compare($src, '.svg', -4) === 0) {
+            $atts['title'] = $alt;
+        }
+
+        foreach ($atts as $label => $value) {
+            $value = esc_attr__($value, pf_toolkit('textdomain'));
             $attributes .= " {$label}=\"{$value}\"";
         }
 
@@ -284,7 +295,8 @@ if (!function_exists('pf_lazy_attachment_image')) {
      * @param string $size
      * @param array $atts
      */
-    function pf_lazy_attachment_image($id, $size = 'thumbnail', $atts = []) {
+    function pf_lazy_attachment_image($id, $size = 'thumbnail', $atts = [])
+    {
         $image = wp_get_attachment_image_src($id, $size);
 
         if ($image) {
@@ -299,8 +311,10 @@ if (!function_exists('pf_lazy_attachment_image')) {
 if (!function_exists('pf_breadcrumb')) {
     /**
      * Output a breadcrumb.
+     * @param null|array $crumbs
      */
-    function pf_breadcrumb() {
+    function pf_breadcrumb($crumbs = [])
+    {
         ?>
         <nav aria-label="You are here:" role="navigation">
             <ul class="breadcrumbs margin-bottom-0">
@@ -312,11 +326,44 @@ if (!function_exists('pf_breadcrumb')) {
                     <?php endif; ?>
                 </li>
 
+                <?php if (!empty($crumbs)) :
+                    foreach ($crumbs as $name => $link) : ?>
+                        <li>
+                            <a href="<?= $link ?>"><?= $name ?></a>
+                        </li>
+                    <?php endforeach;
+                endif ?>
+
                 <?php if (is_post_type_archive()) : ?>
                     <li>
                         <span class="show-for-sr">Current: </span> <?php post_type_archive_title(); ?>
                     </li>
+                <?php elseif (is_archive() && (is_tax() || is_category() || is_tag())) : ?>
+                    <?php
+                    $post_type = get_post_type();
+                    $post_type_archive_link = get_post_type_archive_link($post_type);
 
+                    if (isset($post_type_archive_link) && !empty($post_type_archive_link)) :
+                        $post_type_obj = get_post_type_object($post_type);
+                        $post_type_archive_title = apply_filters('post_type_archive_title', $post_type_obj->labels->name, $post_type);
+                        ?>
+                    <li><a href="<?= $post_type_archive_link ?>"><?= $post_type_archive_title; ?></a></li>
+                    <?php endif; ?>
+                    <li>
+                        <span class="show-for-sr">Current: </span> <?php single_term_title(); ?>
+                    </li>
+                <?php elseif (is_home()) : ?>
+                    <li>
+                        <span class="show-for-sr">Current: </span> <?php single_post_title() ?>
+                    </li>
+                <?php elseif (is_search()) : ?>
+                    <li>
+                        <span class="show-for-sr">Current: </span> Search: <?php the_search_query() ?>
+                    </li>
+                <?php elseif (is_404()) : ?>
+                    <li>
+                        <span class="show-for-sr">Current: </span> <?= apply_filters('pf_404_breadcrumb', __('Page Not Found', pf_toolkit('textdomain'))) ?>
+                    </li>
                 <?php elseif (is_singular()) : ?>
                     <?php
                     $post_type = get_post_type();

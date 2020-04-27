@@ -1,44 +1,18 @@
 {
   "name": "publicfunction-wordpress-toolkit",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "PublicFunction's WordPress Toolkit Plugin",
-  "private": true,
+  "private": false,
   "dependencies": {
-    "@babel/polyfill": "^7.8.0",
+    "@goldencomm/toolkit": "latest",
     "jquery": "^3.4.1",
     "jquery-migrate": "^3.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.0",
-    "@babel/plugin-syntax-dynamic-import": "^7.8.0",
-    "@babel/preset-env": "^7.8.0",
-    "autoprefixer": "^9.7.3",
-    "babel-loader": "^8.0.5",
-    "copy-webpack-plugin": "^5.1.1",
-    "css-loader": "^2.1.1",
-    "file-loader": "^3.0.1",
-    "glob-all": "^3.1.0",
-    "imagemin-webpack-plugin": "^2.4.2",
-    "last-call-webpack-plugin": "^3.0.0",
-    "mini-css-extract-plugin": "^0.6.0",
-    "node-notifier": "^5.4.3",
-    "node-sass": "^4.13.0",
-    "optimize-css-assets-webpack-plugin": "^5.0.1",
-    "postcss": "^7.0.26",
-    "postcss-loader": "^3.0.0",
-    "raw-loader": "^2.0.0",
-    "sass-loader": "^7.3.1",
-    "style-loader": "^0.23.1",
-    "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10",
-    "webpack-merge": "^4.2.2"
+    "@goldencomm/build-scripts": "latest"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack --mode development -w",
-    "setup": "npm install && webpack --mode development --progress",
-    "build": "webpack --mode development --progress",
-    "production": "webpack --mode production --progress"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "browserslist": [
     "last 2 Chrome versions",
@@ -50,5 +24,7 @@
     "ie 11"
   ],
   "author": "mattras82",
-  "license": "MIT"
+  "license": "MIT",
+  "platform": "wordpress",
+  "sideEffects": false
 }
