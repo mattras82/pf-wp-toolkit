@@ -257,9 +257,11 @@ class ScriptsAndStyles extends RunableAbstract
 		return $tag;
 	}
 
-	public function removeMigrate(\WP_Scripts $scripts)
+	public function removeMigrate()
 	{
-		if (!is_admin() && isset($scripts->registered['jquery-migrate'])) {
+		if (!is_admin()) {
+			$scripts = wp_scripts();
+			if (!isset($scripts->registered['jquery-migrate'])) return;
 			$scripts->dequeue('jquery-migrate');
 
 			if (isset($scripts->registered['jquery'])) {
@@ -296,29 +298,6 @@ class ScriptsAndStyles extends RunableAbstract
 			wp_register_script('jquery-migrate', $migratePath, ['jquery'], null, true);
 			wp_enqueue_script('jquery-migrate');
 		}
-	}
-
-	public function printLazyStyles()
-	{
-		?>
-        <style>
-            img[data-src] {
-                transition: opacity 200ms ease-in-out;
-            }
-
-            img[data-src].no-js {
-                display: none;
-            }
-
-            img[data-src].loading {
-                opacity: 0.5;
-            }
-
-            img[data-src].loaded {
-                opacity: 1;
-            }
-        </style>
-		<?php
 	}
 
 	public function lazyLoadBlockStyles($html)
@@ -420,11 +399,7 @@ class ScriptsAndStyles extends RunableAbstract
 		}
 
 		if (!$this->get('use_jquery_migrate'))
-			$this->loader()->addAction('wp_default_scripts', [$this, 'removeMigrate']);
-
-		if ($this->get('toolkit.lazy_load')) {
-			$this->loader()->addAction('wp_head', [$this, 'printLazyStyles']);
-		}
+			$this->loader()->addAction('wp_enqueue_scripts', [$this, 'removeMigrate']);
 
 		$this->loader()->addFilter('style_loader_tag', [$this, 'lazyLoadBlockStyles']);
 		$this->loader()->addAction('wp_print_footer_scripts', [$this, 'lazyLoadBlockStylesScript']);

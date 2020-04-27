@@ -1,15 +1,17 @@
 {
   "debug": false,
   "env": {
-    "development": true,
-    "production": false
+    "development": false,
+    "production": true
   },
   "theme": {
-    "partials" : "template-parts"
+    "partials": "template-parts"
   },
+  "styles": {},
   "use_customizer": false,
   "use_metaboxer": false,
   "use_custom_post_types": false,
   "use_jquery_migrate": false,
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "build": "2kt7ksfz"
 }

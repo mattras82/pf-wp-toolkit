@@ -1,15 +1,27 @@
-# PublicFunction WordPress Toolkit Plugin #
+=== Public Function WordPress Toolkit Plugin ===
+Tested up to: 5.4
+Requires at least: 4.8
+License: GPL-3.0+
+License URI: http://www.gnu.org/licenses/gpl-3.0.txt
 
- - Version 1.0.5
- 
-### WordPress plugin for adding additional, developer-friendly functionality to a site. This includes JSON config file based functionality for Custom Post Types, Metaboxes, Theme Customizer, and more. ###
+WordPress plugin for adding additional, developer-friendly functionality to a site. This includes JSON config file based functionality for Custom Post Types, Metaboxes, Theme Customizer, and more.
 
-## Changelog ##
+== Description ==
 
-### v.1.0.5
+WordPress plugin for adding additional, developer-friendly functionality to a site. This includes JSON config file based functionality for Custom Post Types, Metaboxes, Theme Customizer, and more.
+
+== Installation ==
+
+1. Install the plugin:
+    * Manually: Clone contents of this repository and create "pf-wp-toolkit" folder under wp-content/plugins/
+    * Easily: Use the [GitHub Updater plugin](https://github.com/afragen/github-updater/releases) in the Admin to install this plugin from its [GitHub repository](https://github.com/mattras82/pf-wp-toolkit)
+1. Enable plugin under Wordpress Admin
+
+== Changelog ==
+
+= 1.0.5 =
  - Addition: Adding pf_lazy_option and pf_lazy_meta helper functions
  - Addition: Filtering robots.txt & <meta name="robots"> contents to discourage crawling and indexing by bots
- - Addition: Adding readme.txt file for viewing changelog in WordPress admin
  - Enhancement: Metaboxer max_items enhancement in gallery type
  - Enhancement: Adding title attribute to lazy svg images
  - Enhancement: Improved behavior for placeholder option for Select and Post type fields in Metaboxer
@@ -18,17 +30,17 @@
  - Bug Fix: Customizer Select2 field type placeholder & pre-selected option
  - Bug Fix: Metaboxer fields are now initialized after CustomPostTypes registers everything
 
-### v.1.0.4
+= 1.0.4 =
 - Bug fixes in `pf_get_partial` & Metabox hydration
 
-### v.1.0.3
+= 1.0.3 =
 - Enhancing lazy-images, fixing jQuery migrate & wysiwyg bugs, adding filters to Customizer & Metaboxer functions, updating NPM packages
 
-### v.1.0.2
+= 1.0.2 =
 - Enhancing metaboxer types with custom option/query functionality
 
-### v.1.0.1
+= 1.0.1 =
 - Admin media uploader text bug fix
 
-### v.1.0.0
+= 1.0.0 =
 - Initializing plugin

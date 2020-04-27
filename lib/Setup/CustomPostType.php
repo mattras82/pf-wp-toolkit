@@ -22,7 +22,7 @@ class CustomPostType extends RunableAbstract
      * CustomPostType constructor.
      * @param Container $c
      */
-    public function __construct(Container $c)
+    public function __construct(Container &$c)
     {
         parent::__construct($c);
 
@@ -139,7 +139,7 @@ class CustomPostType extends RunableAbstract
 
         if (isset($this->types[$post_type])) {
             $type = $this->types[$post_type];
-            $singular = isset($type['singular']) && !empty($type['singular']) ?: ucwords($post_type);
+            $singular = isset($type['singular']) && !empty($type['singular']) ? $type['singular'] : ucwords($post_type);
             $messages[$post_type] = $this->get_default_messages($singular, $post);
 
             if ($post_type_object->publicly_queryable) {
@@ -160,6 +160,10 @@ class CustomPostType extends RunableAbstract
             $plural = $singular . 's';
             $args['plural'] = $plural;
         }
+
+	    if (isset($args['labels'])) {
+		    $args['labels'] = wp_parse_args($args['labels'], $this->get_default_labels($singular, $plural));
+	    }
 
         $settings = wp_parse_args($args, $this->get_defaults($singular, $plural, $key));
 
