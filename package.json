@@ -5,8 +5,8 @@
   "private": false,
   "dependencies": {
     "@goldencomm/toolkit": "latest",
-    "jquery": "^3.4.1",
-    "jquery-migrate": "^3.1.0"
+    "jquery": "^3.5.1",
+    "jquery-migrate": "^3.2.0"
   },
   "devDependencies": {
     "@goldencomm/build-scripts": "latest"

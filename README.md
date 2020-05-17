@@ -1,10 +1,18 @@
 # PublicFunction WordPress Toolkit Plugin #
 
- - Version 1.0.5
+ - Version 1.0.6
  
 ### WordPress plugin for adding additional, developer-friendly functionality to a site. This includes JSON config file based functionality for Custom Post Types, Metaboxes, Theme Customizer, and more. ###
 
 ## Changelog ##
+
+### v.1.0.6
+ - Enhancement: AJAX metabox refreshing works in the Block Editor now
+ - Enhancement: AJAX metabox refreshing works for metaboxes with WYSIWYG fields
+ - Updating jQuery & jQuery Migrate to their newest versions (3.5.1 & 3.2)
+ - Bug Fix: Fixing serialization of gallery, checkbox, & radio fields in AJAX Metaboxer handler
+ - Bug Fix: Gallery Metaboxer tabs broke when count was over 10. Not anymore!
+ - Bug Fix: Metaboxer Radios displaying as checkboxes is now fixed (broken in v1.0.5)
 
 ### v.1.0.5
  - Addition: Adding pf_lazy_option and pf_lazy_meta helper functions

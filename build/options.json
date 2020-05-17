@@ -1,3 +1,19 @@
 {
-  "localWebpack": "merge"
+  "localWebpack": "merge",
+  "copy": [
+    {
+      "from": "./_src/images",
+      "to": "images",
+      "ignore": [
+        "*.json"
+      ]
+    },
+    {
+      "from": "./node_modules/jquery/dist/jquery.min.js"
+    },
+    {
+      "from": "./node_modules/jquery-migrate/dist/jquery-migrate.min.js"
+    }
+  ]
 }
+  

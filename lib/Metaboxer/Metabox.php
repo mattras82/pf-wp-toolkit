@@ -226,7 +226,23 @@ class Metabox extends MetaboxAbstract
         foreach ($_POST['form'] as $form_field) {
             if(substr($form_field['name'], 0, strlen($this->metakey)) === $this->metakey) {
                 if ($this->use_single_keys) {
-                    $data[$form_field['name']] = $form_field['value'];
+                    if (substr($form_field['name'], -2) === '[]') {
+                        // This is a checkbox or radio field. Turn it into an array
+                        if (empty($data[substr($form_field['name'], 0, -2)])) {
+                            $data[substr($form_field['name'], 0, -2)] = array();
+                        }
+                        $data[substr($form_field['name'], 0, -2)][] = $form_field['value'];
+                    } else if (substr($form_field['name'], -1) === ']') {
+                        // This is a gallery field. Turn it into an associative array
+                        $inner_name = substr($form_field['name'], strpos($form_field['name'], '[') + 1, -1);
+                        $name = substr($form_field['name'], 0, strpos($form_field['name'], '['));
+                        if (empty($data[$name])) {
+                            $data[$name] = array();
+                        }
+                        $data[$name][$inner_name] = $form_field['value'];
+                    } else {
+                        $data[$form_field['name']] = $form_field['value'];
+                    }
                 } else {
                     $data[substr($form_field['name'], strlen($this->metakey)+1, -1)] = $form_field['value'];
                 }

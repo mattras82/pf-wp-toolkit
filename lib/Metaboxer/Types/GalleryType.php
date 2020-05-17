@@ -142,7 +142,7 @@ class GalleryType extends BaseType
         echo '<div class="tabs-contents" data-pf-tabs-content="'.$this->id.'-tabs">';
         $i = -1;
         foreach($this->field_classes as $key => $field) {
-            if ($i != substr($key, -1)) {
+            if ($i != substr($key, (strlen($i) * -1))) {
                 $new_tab = true;
                 $i++;
                 echo ($i > 0 ? '</div>' : '');

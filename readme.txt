@@ -19,6 +19,14 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 
 == Changelog ==
 
+= 1.0.6 =
+ - Enhancement: AJAX metabox refreshing works in the Block Editor now
+ - Enhancement: AJAX metabox refreshing works for metaboxes with WYSIWYG fields
+ - Updating jQuery & jQuery Migrate to their newest versions (3.5.1 & 3.2)
+ - Bug Fix: Fixing serialization of gallery, checkbox, & radio fields in AJAX Metaboxer handler
+ - Bug Fix: Gallery Metaboxer tabs broke when count was over 10. Not anymore!
+ - Bug Fix: Metaboxer Radios displaying as checkboxes is now fixed (broken in v1.0.5)
+
 = 1.0.5 =
  - Addition: Adding pf_lazy_option and pf_lazy_meta helper functions
  - Addition: Filtering robots.txt & <meta name="robots"> contents to discourage crawling and indexing by bots
