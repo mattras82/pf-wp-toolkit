@@ -45,7 +45,7 @@ class ImageType extends BaseType
         if (isset($meta[$this->key]))
             $this->field_attr['value'] = [
                 'url' => $meta[$this->key],
-                'id' => isset($this->field_attr['value']['id']) ? $this->field_attr['value']['id'] : ''
+                'id' => isset($meta[$this->key.'_id']) ? $meta[$this->key.'_id'] : ''
             ];
 
         return $this->display_field();

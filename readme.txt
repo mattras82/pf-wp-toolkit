@@ -19,6 +19,9 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 
 == Changelog ==
 
+= 1.0.7 =
+ - Bug Fix: Metaboxer image IDs not being set properly in admin (broken in v1.0.6)
+
 = 1.0.6 =
  - Enhancement: AJAX metabox refreshing works in the Block Editor now
  - Enhancement: AJAX metabox refreshing works for metaboxes with WYSIWYG fields

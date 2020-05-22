@@ -1,10 +1,13 @@
 # PublicFunction WordPress Toolkit Plugin #
 
- - Version 1.0.6
+ - Version 1.0.7
  
 ### WordPress plugin for adding additional, developer-friendly functionality to a site. This includes JSON config file based functionality for Custom Post Types, Metaboxes, Theme Customizer, and more. ###
 
 ## Changelog ##
+
+### v.1.0.7
+ - Bug Fix: Metaboxer image IDs not being set properly in admin (broken in v1.0.6)
 
 ### v.1.0.6
  - Enhancement: AJAX metabox refreshing works in the Block Editor now
