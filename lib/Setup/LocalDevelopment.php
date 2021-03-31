@@ -9,11 +9,11 @@ use Yoast\WP\SEO\Presentations\Indexable_Presentation;
 
 class LocalDevelopment extends RunableAbstract
 {
-    private string $local_url;
+    private $local_url;
 
-    private string $remote_url;
+    private $remote_url;
 
-    private string $local_port;
+    private $local_port;
 
     public function __construct(Container &$c)
     {
