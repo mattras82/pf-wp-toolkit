@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-$(document).ready(function() {
+$(function() {
   let $sliders = $('.pfwp-customize-range-slider');
 
   if ($sliders.length > 0) {

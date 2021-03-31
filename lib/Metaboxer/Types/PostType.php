@@ -3,6 +3,7 @@
 namespace PublicFunction\Toolkit\Metaboxer\Types;
 
 use PublicFunction\Toolkit\Core\Markup;
+use PublicFunction\Toolkit\Assets\Helpers;
 use \WP_Query;
 
 class PostType extends SelectType
@@ -35,8 +36,6 @@ class PostType extends SelectType
     public function __construct($args)
     {
         parent::__construct($args);
-
-
     }
 
     /**
@@ -55,6 +54,12 @@ class PostType extends SelectType
             $this->query['post_type'] = $this->post_type;
             $this->query['orderby'] = isset($this->query['orderby']) ? $this->query['orderby'] : $this->orderby;
             $this->query['order'] = isset($this->query['order']) ? $this->query['order'] : $this->order;
+        }
+
+        $helpers = new Helpers();
+
+        foreach($this->query as $key => $val) {
+            $this->query[$key] = $helpers->shortcodeOrCallback($val);
         }
 
         $post_query = new WP_Query($this->query);

@@ -21,9 +21,9 @@ function addTinyMCEListeners($editors) {
   }
 }
 
-$(document).ready(function () {
+$(function () {
   let $editors = $('textarea.wp-editor-area');
-  if ($editors.length) {
+  if ($editors.length && typeof tinyMCE !== 'undefined') {
     addTinyMCEListeners($editors);
   }
 });

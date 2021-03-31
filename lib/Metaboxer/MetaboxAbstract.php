@@ -1,4 +1,5 @@
 <?php
+
 /**
  * NO STEP ON SNEK:
  *
@@ -11,6 +12,8 @@ namespace PublicFunction\Toolkit\Metaboxer;
 
 use PublicFunction\Toolkit\Plugin;
 use PublicFunction\Toolkit\Core\RunableAbstract;
+use WP_Post;
+use WP_Term;
 
 abstract class MetaboxAbstract extends RunableAbstract
 {
@@ -31,7 +34,7 @@ abstract class MetaboxAbstract extends RunableAbstract
      * The name of the box, used for the title and html ID
      * @var string
      */
-    protected $name = 'PF Metabox';
+    protected $name = 'GC Metabox';
 
     /**
      * The html ID used by the metabox html elements
@@ -124,22 +127,22 @@ abstract class MetaboxAbstract extends RunableAbstract
     }
 
     /**
-     * @param int $post_id
+     * @param int $id
      * @param array $defaults
      * @param null|string $parent_key
      */
-    private function _save_single_keys($post_id, $defaults = [], $parent_key = null)
+    private function _save_single_keys($id, $defaults = [], $object_type = 'post', $parent_key = null)
     {
         foreach ($defaults as $default_key => $default_value) {
             $mk = $parent_key . '_' . $default_key;
 
             if (is_array($default_value)) {
-                $this->_save_single_keys($post_id, $default_value, $mk);
+                $this->_save_single_keys($id, $default_value, $object_type, $mk);
             } else {
                 if (($value = isset($_POST[$mk]) ? $_POST[$mk] : null) && !empty($value)) {
-                    update_post_meta($post_id, $mk, $value);
+                    update_metadata($object_type, $id, $mk, $value);
                 } else {
-                    delete_post_meta($post_id, $mk);
+                    delete_metadata($object_type, $id, $mk);
                 }
             }
         }
@@ -147,33 +150,40 @@ abstract class MetaboxAbstract extends RunableAbstract
 
     /**
      * Saves the post's meta data created by this metabox
-     * @param null|int $post_id
-     * @param boolean $ajax_save
+     * @param null|int $id
+     * @param string $object_type
      * @return int|null
      */
-    public function save($post_id = null)
+    protected function save($id = null, $object_type = 'post')
     {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
-            return $post_id;
+            return $id;
 
         if (isset($_POST['_inline_edit']))
-            return $post_id;
+            return $id;
 
-        $correct_screen = in_array(get_post_type($post_id), (array)$this->post_type);
-
-        if ($_POST && $correct_screen) {
+        if ($_POST) {
 
             if ($this->use_single_keys) {
-                $this->_save_single_keys($post_id, $this->defaults, $this->metakey);
+                $this->_save_single_keys($id, $this->defaults, $object_type, $this->metakey);
             } else {
                 if (($value = $_POST[$this->metakey]) && !empty($value)) {
-                    update_post_meta($post_id, $this->metakey, $value);
+                    update_metadata($object_type, $id, $this->metakey, $value);
                 } else {
-                    delete_post_meta($post_id, $this->metakey);
+                    delete_metadata($object_type, $id, $this->metakey);
                 }
             }
         }
 
+        return $id;
+    }
+
+    public function save_post($post_id = null)
+    {
+        $correct_screen = in_array(get_post_type($post_id), (array) $this->post_type);
+        if ($correct_screen) {
+            return $this->save($post_id);
+        }
         return $post_id;
     }
 
@@ -309,39 +319,48 @@ abstract class MetaboxAbstract extends RunableAbstract
 
     /**
      * Returns the meta data for a post based on the metakey of a child class
-     * @param int|null|\WP_Post $post
+     * @param int $post
+     * @param string $object_type
      * @return mixed
      */
-    protected function _get_meta($post = null)
+    protected function _get_meta($id, $object_type = 'post')
     {
-        if (is_object($post))
-            $post = $post->ID;
+        if ($id instanceof WP_Post) {
+            $id = intval($id->ID);
+        } else if ($id instanceof WP_Term) {
+            $id = intval($id->term_id);
+            $object_type = 'term';
+        } else if (empty($id)) {
+            $id = intval(get_the_ID());
+        }
 
-        return get_post_meta($post, $this->metakey, true);
+        return get_metadata($object_type, $id, $this->metakey, true);
     }
 
     /**
-     * @param int|null|\WP_Post $post
+     * @param int $id
      * @param array $defaults
+     * @param string $object_type
      * @param null|string $parent_key
      * @return array
      */
-    private function _get_single_key_meta($post = null, $defaults = [], $parent_key = null)
+    private function _get_single_key_meta($id = null, $defaults = [], $object_type, $parent_key = null)
     {
         $meta = [];
         if (!$parent_key)
             $parent_key = $this->metakey;
 
-        if (is_object($post))
-            $post = $post->ID;
+        if (!is_int($id))
+            $id = get_the_ID();
 
         foreach ($defaults as $key => $value) {
             $meta_key = $parent_key . '_' . $key;
             $val = null;
             if (is_array($value)) {
-                $val = $this->_get_single_key_meta($post, $value, $meta_key);
+                $val = $this->_get_single_key_meta($id, $value, $object_type, $meta_key);
             }
-            if ($val || ($val = get_post_meta($post, $meta_key, true))) {
+            $val = $val ?: get_metadata($object_type, $id, $meta_key, true);
+            if ($val) {
                 $meta[$key] = $val;
             }
         }
@@ -350,31 +369,40 @@ abstract class MetaboxAbstract extends RunableAbstract
     }
 
     /**
-     * @param int|null|\WP_Post $post
+     * @param int $id
+     * @param string $object_type
      * @return array
      */
-    protected function get_meta_with_defaults($post)
+    protected function get_meta_with_defaults($id, $object_type = 'post')
     {
         return $this->use_single_keys ?
-            $this->_get_single_key_meta($post, $this->defaults) :
-            wp_parse_args($this->_get_meta($post), $this->defaults);
+            $this->_get_single_key_meta($id, $this->defaults, $object_type) :
+            wp_parse_args($this->_get_meta($id, $object_type), $this->defaults);
     }
 
     /**
      * Returns either all meta data or one by key if passed.
-     * @param  \WP_Post|int $post_id
+     * @param  \WP_Post|\WP_Term|int $id
      * @param  string $key
      * @return mixed
      */
-    public function get_meta($key = null, $post_id = null)
+    public function get_meta($key = null, $id = null, $object_type = 'post')
     {
-        if (empty($post_id))
-            $post_id = get_the_ID();
+        if (empty($id))
+            $id = intval(get_the_ID());
 
-        if (is_object($post_id))
-            $post_id = $post_id->ID;
+        if ($id instanceof WP_Post)
+            $id = intval($id->ID);
 
-        $values = $this->get_meta_with_defaults($post_id);
+        if ($id instanceof WP_Term) {
+            $id = intval($id->term_id);
+            $object_type = 'term';
+        }
+
+        if (!is_int($id))
+            return '';
+
+        $values = $this->get_meta_with_defaults($id, $object_type);
         return !empty($key) && isset($values[$key]) ? $values[$key] : $values;
     }
 
@@ -384,9 +412,9 @@ abstract class MetaboxAbstract extends RunableAbstract
      * @param  string $key
      * @return mixed
      */
-    public static function meta($key = null, $post_id = null)
+    public static function meta($key = null, $post_id = null, $object_type = 'post')
     {
-        return (new static(Plugin::getInstance()->container()))->get_meta($key, $post_id);
+        return (new static(Plugin::getInstance()->container()))->get_meta($key, $post_id, $object_type);
     }
 
     /**
@@ -410,6 +438,6 @@ abstract class MetaboxAbstract extends RunableAbstract
             $this->loader()->addAction("add_meta_boxes_$type", [$this, 'add']);
         }
         $this->loader()->addAction('admin_head', [$this, 'loadHead']);
-        $this->loader()->addAction('save_post', [$this, 'save']);
+        $this->loader()->addAction('save_post', [$this, 'save_post']);
     }
 }

@@ -22,21 +22,12 @@
   @import "metaboxer/quick-box";
   @import "metaboxer/image-quick-box";
   @import "metaboxer/tabs";
+
+  &.termbox {
+    @import "metaboxer/term-box";
+  }
 }
 
 html.wysiwyg-fix {
   overflow-y: scroll;
 }
-
-.edit-post-meta-boxes-area .postbox {
-
-  .handlediv {
-    position: absolute;
-    right: 0;
-  }
-
-  .no-sort {
-    cursor: pointer !important;
-  }
-}
-

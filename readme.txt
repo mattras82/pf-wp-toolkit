@@ -1,5 +1,5 @@
 === Public Function WordPress Toolkit Plugin ===
-Tested up to: 5.4
+Tested up to: 5.7
 Requires at least: 4.8
 License: GPL-3.0+
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
@@ -18,6 +18,20 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 1. Enable plugin under Wordpress Admin
 
 == Changelog ==
+
+= 1.0.8 =
+
+Released on: 30 Mar 2021
+
+ - New Feature: Local Development
+ - Enhancement: Adding support for Yoast breadcrumbs in the `pf_breadcrumb()` function
+ - Enhancement: Adding support for taxonomies in Metaboxer
+ - Enhancement: Adding support for re-sorting metaboxes with WYSIWYGs in post admin screen
+ - Enhancement: Adding `hide_from_rest` property for Customizer and Metaboxer fields
+ - Update: Updating Lazy Images, jQuery & jQuery Migrate
+ - Update: removing ie11 from the browserslist array. This plugin *no longer supports Internet Explorer* out of the box.
+ - Bug Fix: Fixing the `noindex, nofollow` meta tag bug that was recently introduced by an update in the Yoast SEO plugin
+ - Bug Fix: Several bug fixes in Metaboxer, Setup, & Customizer
 
 = 1.0.7 =
  - Bug Fix: Metaboxer image IDs not being set properly in admin (broken in v1.0.6)

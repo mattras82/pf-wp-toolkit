@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-$(document).ready(function() {
+$(function() {
   const selPrefix = 'pfwp-customize-accordion';
   const footerSel = '.' + selPrefix + '-footer';
   const headerSel = '.' + selPrefix + '-heading';

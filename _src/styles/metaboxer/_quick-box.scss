@@ -21,7 +21,7 @@
     &-label {
       display: block;
       font-weight: 600;
-      margin-bottom: 4px;
+      margin: 0 0 4px;
 
       span {
         font-weight: normal;
@@ -29,7 +29,8 @@
     }
 
     &-radios,
-    &-checkboxes {
+    &-checkboxes,
+    &-multi_post {
       background: #ffffff;
       padding: .5em;
       border: 1px solid #d9d9d9;
@@ -37,9 +38,29 @@
       max-height: 220px;
       overflow: auto;
 
+      > .field-label {
+        font-size: 15px;
+        border-bottom: 1px dashed #aaa;
+      }
+
       label {
         display: block;
-        margin: 0 0 5px;
+        margin: 8px 0;
+
+        span {
+          font-weight: 600;
+        }
+      }
+    }
+
+    &-checkbox {
+      label {
+        display: block;
+        margin: 8px 0;
+
+        span {
+          font-weight: 600;
+        }
       }
     }
 
@@ -52,5 +73,15 @@
         }
       }
     }
+  }
+
+  > .field-checkbox,
+  .tabs-content > .field-checkbox {
+    background: #ffffff;
+    padding: .5em;
+    border: 1px solid #d9d9d9;
+    max-width: 300px;
+    max-height: 220px;
+    overflow: auto;
   }
 }

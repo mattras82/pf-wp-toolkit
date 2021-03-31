@@ -1,10 +1,12 @@
 import $ from 'jquery';
 import meta_tabs from './metabox-tabs';
 import meta_wysiwyg from './metabox-wysiwyg';
+import {reInitWysiwyg, getWysiwygIDs} from './metabox-wysiwyg';
 import meta_upload from './metabox-upload';
 
 function refresh(container) {
-  let metakey = container.find('.pf-metabox').data('pf-metakey');
+  let box = container.find('.pf-metabox');
+  let metakey = box.data('pf-metakey');
   let action = `${metakey}_refresh`;
   if (document.body.classList.contains('block-editor-page')) {
     let formData = [
@@ -20,56 +22,50 @@ function refresh(container) {
       });
     });
     // Save all of the WYSIWYG IDs so we can re-init them later
-    let wysiwygIDs = getWysiwygIDs(container);
+    let wysiwygIDs = getWysiwygIDs(container, true);
     refreshMetabox(container, action, formData, function () {
-      wysiwygIDs.forEach(id => reInitWysiwyg(id));
+      if (wysiwygIDs.length) {
+        wysiwygIDs.forEach(id => reInitWysiwyg(id));
+        let newIDs = getWysiwygIDs(container).filter(id => wysiwygIDs.indexOf(id) === -1);
+        if (newIDs.length) {
+          newIDs.forEach(id => {
+            // We've got a new WYSIWYG editor. It won't have a PreInit object, so we'll grab an existing one and initialize it with that
+            let init = tinyMCEPreInit.mceInit[wysiwygIDs[0]];
+            init.selector = `#${id}`;
+            reInitWysiwyg(id, 0, init)
+          });
+        }
+      }
       return true;
     });
   } else {
     let formData = $('form#post').serializeArray();
+    if (box.hasClass('pf-metabox--term')) {
+      formData = $('form#edittag').serializeArray();
+    }
     // Save all of the WYSIWYG IDs so we can re-init them later
-    let wysiwygIDs = getWysiwygIDs(container);
+    let wysiwygIDs = getWysiwygIDs(container, true);
     refreshMetabox(container, action, formData, function () {
-      wysiwygIDs.forEach(id => reInitWysiwyg(id));
+      if (wysiwygIDs.length) {
+        wysiwygIDs.forEach(id => reInitWysiwyg(id));
+        let newIDs = getWysiwygIDs(container).filter(id => wysiwygIDs.indexOf(id) === -1);
+        if (newIDs.length) {
+          newIDs.forEach(id => {
+            // We've got a new WYSIWYG editor. It won't have a PreInit object, so we'll grab an existing one and initialize it with that
+            let init = tinyMCEPreInit.mceInit[wysiwygIDs[0]];
+            init.selector = `#${id}`;
+            reInitWysiwyg(id, 0, init)
+          });
+        }
+      }
       return true;
     });
-  }
-}
-
-function getWysiwygIDs(container) {
-  let ids = [];
-  container.find('.field-label-wysiwyg').each(function () {
-    if (typeof tinymce === 'undefined') return;
-    let editor = tinymce.editors[this.getAttribute('for')];
-    // Remove the editor instance so there's no conflicts later
-    if (typeof editor !== 'undefined') editor.remove();
-    ids.push(this.getAttribute('for'));
-  });
-  return ids;
-}
-
-//Re-initialize a wp_editor instance based on the given id.
-//This code was copied from the class-wp-editor.php file from WP Core
-function reInitWysiwyg(id, count = 0) {
-  let init = tinyMCEPreInit.mceInit[id];
-  let $wrap = tinymce.$('#wp-' + id + '-wrap');
-  if ($wrap.length !== 1 && count < 5) {
-    // The $wrap element is initialized by some async WP core code.
-    // We'll wait a bit and try to run this again to give time for that markup to get initialized
-    setTimeout(() => {
-      reInitWysiwyg(id, count + 1)
-    }, 500);
-  }
-
-  if (($wrap.hasClass('tmce-active') || !tinyMCEPreInit.qtInit.hasOwnProperty(id)) && !init.wp_skip_init) {
-    tinymce.init(init);
-    if (typeof quicktags === 'function') quicktags(id);
   }
 }
 
 function refreshMetabox(container, action, formData, callback = null) {
   container.slideToggle('fast', function () {
-    $(this).html('<span class="spinner is-active" style="float: none"></span>').slideToggle('fast');
+    $(this).html('<span class="spinner is-active" style="float: none"></span><p>Saving...</p>').slideToggle('fast');
   });
   $.ajax
     ({
@@ -78,10 +74,6 @@ function refreshMetabox(container, action, formData, callback = null) {
       data: { 'action': action, 'form': formData },
       success: function (data) {
         container.slideToggle('fast', function () {
-          if (callback && typeof callback === 'function') {
-            let cb = callback();
-            if (!cb) return cb;
-          }
           $(this).html(data).slideToggle(450, function () {
             $(this).removeAttr('style');
           });
@@ -89,6 +81,9 @@ function refreshMetabox(container, action, formData, callback = null) {
           meta_wysiwyg();
           meta_upload();
           addListeners();
+          if (callback && typeof callback === 'function') {
+            return callback();
+          }
         });
       },
       error: function (data, status) {
@@ -109,7 +104,7 @@ function addListeners() {
   });
 }
 
-$(document).ready(function () {
+$(function () {
   //Adds a panel to a gallery type in the metabox
   $('[id*="pf-metabox"]').on('click', '[data-gallery-id-add]', function () {
     let id = $(this).data('gallery-id-add');

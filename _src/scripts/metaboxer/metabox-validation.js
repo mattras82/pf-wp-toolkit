@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-$(document).ready(function() {
+$(function() {
   $('form#post').on('submit', function(e){
     let valid = true;
     $(this).find('input[required], select[required], textarea[required]').each(function() {

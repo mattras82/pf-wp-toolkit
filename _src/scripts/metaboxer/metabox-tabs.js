@@ -30,7 +30,7 @@ function meta_tabs() {
   });
 }
 
-$(document).ready(function() {
+$(function() {
   meta_tabs();
 });
 

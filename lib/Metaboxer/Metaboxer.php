@@ -44,8 +44,9 @@ class Metaboxer extends RunableAbstract
             $this->metaboxes[$bid] = $metabox->enqueue();
         }
 
-        $this->rest_api()->addEndpoint("/metaboxer/(?P<post>[0-9]+)/(?P<path>[a-zA-Z|-|_]+)", [
-            'callback' => [$this, 'metaboxerRest']
+        $this->rest_api()->addEndpoint("/metaboxer/(?P<post>[0-9]+)/(?P<path>[a-zA-Z-_.]+)", [
+            'callback' => [$this, 'metaboxer_rest'],
+            'permission_callback'   => '__return_true'
         ]);
     }
 
@@ -55,7 +56,7 @@ class Metaboxer extends RunableAbstract
     public function boxes()
     {
         static $fields = [];
-        if(empty($fields)) {
+        if (empty($fields)) {
             $fields = new JsonConfig($this->get('theme.config_path') . 'metaboxer.json');
             $fields = $fields->get();
             foreach ($fields as &$box) {
@@ -69,126 +70,148 @@ class Metaboxer extends RunableAbstract
         return $fields;
     }
 
-    private function getMeta($id) {
-        if (!isset($this->metaCache[$id])) {
-            $this->metaCache[$id] = get_post_meta($id);
+
+    /**
+     * Gets the metadata for the object from this classes cache, or gets it from the system and then caches it
+     *
+     * @param  int $id The post or term ID
+     * @param  string $object_type The string containing either "post" or "term"
+     * @return mixed The cached metadata value
+     */
+    private function get_meta($id, $object_type = 'post')
+    {
+        if (!isset($this->metaCache[$object_type][$id])) {
+            $this->metaCache[$object_type][$id] = get_metadata($object_type, $id);
         }
 
-        return $this->metaCache[$id];
+        return $this->metaCache[$object_type][$id];
     }
 
     /**
      * @return array
      */
-    public function getDefaults()
+    public function get_defaults()
     {
         static $defaults = [];
-        if(empty($defaults)) {
-            foreach($this->boxes() as $bid => $box) {
-                $fields = [];
-                if (is_string($box['fields'])) {
-                    $box['fields'] = $this->helper->shortcodeOrCallback($box['fields']);
-                }
-                if(!empty($box['fields']) && is_array($box['fields'])) {
-                    foreach($box['fields'] as $id => $field) {
-                        $fields[$id] = isset($field['default']) ? $this->helper->shortcodeOrCallback($field['default']) : '';
-                        if ($field['type'] == 'image') {
-                            $fields[$id.'_id'] = '';
-                        } else if ($field['type'] == 'gallery') {
-                            if (is_string($field['fields'])) {
-                                $field['fields'] = $this->helper->shortcodeOrCallback($field['fields']);
-                            }
-
-                            foreach ($field['fields'] as $gid => $gfield) {
-                                $field['fields'][$gid] = isset($gfield['default']) ? $this->helper->shortcodeOrCallback($gfield['default']) : '';
-                                if ($gfield['type'] === 'image') $field['fields'][$gid.'_id'] = '';
-                            }
-                            $fields[$id] = array(
-                                'count' => isset($field['default']) ? $field['default'] : '1',
-                                'fields' => $field['fields']
-                            );
-                        }
-                    }
-                }
-                $defaults[$bid] = $fields;
+        if (empty($defaults) || pf_toolkit('pf_metaboxer_rest')) {
+            foreach ($this->boxes() as $bid => $box) {
+                $defaults[$bid] = $this->setup_default_fields($box['fields']);
             }
         }
 
         return $defaults;
     }
 
+    private function setup_default_fields($args, $fields = [])
+    {
+        $types = Metaboxer::get_type_classes();
+
+        if (is_string($args))
+            $args = $this->helper->shortcodeOrCallback($args);
+
+        if (is_array($args)) {
+            foreach($args as $id => $field) {
+                if (!empty($field['hide_from_rest']) && pf_toolkit('pf_metaboxer_rest'))
+                    continue;
+                $default = '';
+                if (
+                    $field['type'] === 'checkboxes'
+                    || is_subclass_of($types[$field['type']], $types['checkboxes'])
+                ) {
+                    $default = [];
+                } elseif (
+                    'image' === $field['type']
+                    || is_subclass_of($types[$field['type']], $types['image'])
+                ) {
+                    $fields[$id . '_id'] = '';
+                } elseif (
+                    'gallery' === $field['type']
+                    || is_subclass_of($types[$field['type']], $types['gallery'])
+                ) {
+                    $default = array(
+                        'count' => isset($field['default']) ? $field['default'] : '1',
+                        'fields' => $this->setup_default_fields($field['fields'])
+                    );
+                    unset($field['default']);
+                }
+                $fields[$id] = !empty($field['default']) ? $this->helper->shortcodeOrCallback($field['default']) : $default;
+            }
+        }
+        return $fields;
+    }
+
     /**
      * Returns an array of all fields with their defaults
-     * @param \WP_Post|int|null $post
+     * @param WP_Post|WP_Term|int|null $post
      * @return array
      */
-    public function saved($post)
+    public function saved($post, $object_type = 'post')
     {
-        $defaults = $this->getDefaults();
+        $defaults = $this->get_defaults();
         $boxes = $this->boxes();
+        $id = null;
 
-        if(empty($post) || is_int($post))
+        if ($object_type === 'term') {
+            $post = get_term($post);
+            $id = intval($post->term_id);
+        } else {
             $post = get_post($post);
+            $id = intval($post->ID);
+        }
 
-        $meta = $this->getMeta($post->ID);
+        $meta = $this->get_meta($id, $object_type);
 
-        foreach($meta as $key => $value) {
+        foreach ($meta as $key => $value) {
             if (is_array($value) && (is_serialized($value[0]) || count($value) === 1)) {
                 $meta[$key] = maybe_unserialize($value[0]);
             }
         }
 
-        if (isset($this->outputCache[$post->ID])) {
-            $output = $this->outputCache[$post->ID];
+        if (isset($this->outputCache[$object_type][$id])) {
+            $output = $this->outputCache[$object_type][$id];
         } else {
             $output = [];
-            foreach($defaults as $bid => $box) {
-                $correctPost = (is_array($boxes[$bid]['post_type']) ? in_array($post->post_type, $boxes[$bid]['post_type']) : $boxes[$bid]['post_type'] == $post->post_type);
-                if(!isset($output[$bid]) && $correctPost) {
+            foreach ($defaults as $bid => $box) {
+                $correctPost = false;
+                if ($object_type === 'term' && !empty($boxes[$bid]['taxonomy'])) {
+                    $correctPost = in_array($post->taxonomy, (array) $boxes[$bid]['taxonomy']);
+                } else if (!empty($boxes[$bid]['post_type'])) {
+                    $correctPost = in_array($post->post_type, (array) $boxes[$bid]['post_type']);
+                }
+                if (!isset($output[$bid]) && $correctPost) {
                     $output[$bid] = [];
                 } else {
                     continue;
                 }
-                if(is_array($box)) {
-                    foreach($box as $key => $value) {
+                if (is_array($box)) {
+                    foreach ($box as $key => $value) {
                         if ($this->metaboxes[$bid]->is_single()) {
-                            $metaValue = isset($meta[$bid.'_meta_'.$key]) ? $meta[$bid.'_meta_'.$key] : $value;
+                            $metaValue = isset($meta[$bid . '_meta_' . $key]) ? $meta[$bid . '_meta_' . $key] : $value;
                         } else {
-                            $metaValue = isset($meta[$bid.'_meta'][$key]) ? $meta[$bid.'_meta'][$key] : $value;
+                            $metaValue = isset($meta[$bid . '_meta'][$key]) ? $meta[$bid . '_meta'][$key] : $value;
                         }
-                        if ($value && is_array($value) && isset($value['fields'])) { //This is a gallery field. Lots of work to do...
+                        if (is_array($value) && isset($value['fields'])) { //This is a gallery field. Lots of work to do...
                             $count = intval(is_array($metaValue) ? $value['count'] : $metaValue);
                             $i = 0;
                             $metaValue = array();
-                            if (is_string($value['fields'])) {
-                                $value['fields'] = $this->helper->shortcodeOrCallback($value['fields']);
-                            }
                             while ($i < $count) {
                                 $metaValue[$i] = array();
-                                foreach ($value['fields'] as $field_key => $field) {
-                                    $default = is_string($field) ? $field : (isset($field['default']) ? $field['default'] : '');
+                                foreach ($value['fields'] as $field_key => $default) {
                                     if (substr($field_key, -3) === '_id') { // Image ID field
                                         $image_key = substr($field_key, 0, -3);
                                         if ($this->metaboxes[$bid]->is_single()) {
-                                            $fieldValue = isset($meta[$bid.'_meta_'.$key.'_data'][$image_key.'_'.$i.'_id']) ? $meta[$bid.'_meta_'.$key.'_data'][$image_key.'_'.$i.'_id'] : $default;
+                                            $fieldValue = isset($meta[$bid . '_meta_' . $key . '_data'][$image_key . '_' . $i . '_id']) ? $meta[$bid . '_meta_' . $key . '_data'][$image_key . '_' . $i . '_id'] : $default;
                                         } else {
-                                            $fieldValue = isset($meta[$bid.'_meta'][$key.'_'.$image_key.'_'.$i.'_id']) ? $meta[$bid.'_meta'][$key.'_'.$image_key.'_'.$i.'_id'] : $default;
+                                            $fieldValue = isset($meta[$bid . '_meta'][$key . '_' . $image_key . '_' . $i . '_id']) ? $meta[$bid . '_meta'][$key . '_' . $image_key . '_' . $i . '_id'] : $default;
                                         }
                                     } else {
                                         if ($this->metaboxes[$bid]->is_single()) {
-                                            $fieldValue = isset($meta[$bid.'_meta_'.$key.'_data'][$field_key.'_'.$i]) ? $meta[$bid.'_meta_'.$key.'_data'][$field_key.'_'.$i] : $default;
+                                            $fieldValue = isset($meta[$bid . '_meta_' . $key . '_data'][$field_key . '_' . $i]) ? $meta[$bid . '_meta_' . $key . '_data'][$field_key . '_' . $i] : $default;
                                         } else {
-                                            $fieldValue = isset($meta[$bid.'_meta'][$key.'_'.$field_key.'_'.$i]) ? $meta[$bid.'_meta'][$key.'_'.$field_key.'_'.$i] : $default;
+                                            $fieldValue = isset($meta[$bid . '_meta'][$key . '_' . $field_key . '_' . $i]) ? $meta[$bid . '_meta'][$key . '_' . $field_key . '_' . $i] : $default;
                                         }
                                     }
                                     $metaValue[$i][$field_key] = $fieldValue;
-                                    if (is_array($field) && $field['type'] == 'image' && substr($field_key)) {
-                                        if ($this->metaboxes[$bid]->is_single()) {
-                                            $metaValue[$i][$field_key.'_id'] = isset($meta[$bid.'_meta_'.$key.'_data'][$field_key.'_'.$i.'_id']) ? $meta[$bid.'_meta_'.$key.'_data'][$field_key.'_'.$i.'_id'] : '';
-                                        } else {
-                                            $metaValue[$i][$field_key.'_id'] = isset($meta[$bid.'_meta'][$key.'_'.$field_key.'_'.$i.'_id']) ? $meta[$bid.'_meta'][$key.'_'.$field_key.'_'.$i.'_id'] : '';
-                                        }
-                                    }
                                 }
                                 $i++;
                             }
@@ -197,13 +220,14 @@ class Metaboxer extends RunableAbstract
                     }
                 }
             }
-            $this->outputCache[$post->ID] = $output;
+            $this->outputCache[$object_type][$id] = $output;
         }
 
         return $output;
     }
 
-    public function clear_meta_cache() {
+    public function clear_meta_cache()
+    {
         $this->metaCache = [];
         $this->outputCache = [];
     }
@@ -212,10 +236,12 @@ class Metaboxer extends RunableAbstract
      * Used by the Metabox and GalleryType classes
      * @return array
      */
-    public static function get_type_classes() {
-        return array(
+    public static function get_type_classes()
+    {
+        return apply_filters('pf_metaboxer_type_classes', array(
             'text' => TextType::class,
             'number' => TextType::class,
+            'hidden' => TextType::class,
             'date' => DateType::class,
             'textarea' => TextareaType::class,
             'wysiwyg' => WysiwygType::class,
@@ -229,23 +255,25 @@ class Metaboxer extends RunableAbstract
             'gallery' => GalleryType::class,
             'media' => MediaType::class,
             'multi_post' => MultiPostType::class
-        );
+        ));
     }
 
     /**
      * @param string $path
-     * @param int|object $post
+     * @param int|WP_Post|WP_Term $post
+     * @param string $object_type
      * @return null|mixed
      */
-    public function meta($path = '', $post) {
-        return DotNotation::parse($path, $this->saved($post));
+    public function meta($path = '', $post = null, $object_type = 'post')
+    {
+        return DotNotation::parse($path, $this->saved($post, $object_type));
     }
 
     /**
      * @param \WP_REST_Request $request
      * @return mixed|\WP_Error|null
      */
-    public function metaboxerRest(\WP_REST_Request $request)
+    public function metaboxer_rest(\WP_REST_Request $request)
     {
         if (!isset($request['path'])) {
             return new \WP_Error('pf_no_path', 'Invalid Metaboxer path', ['status' => 404]);
@@ -254,11 +282,14 @@ class Metaboxer extends RunableAbstract
             return new \WP_Error('pf_no_post', 'Invalid Metaboxer Post ID', ['status' => 404]);
         }
 
+        pf_toolkit('pf_metaboxer_rest', true);
+
         return $this->meta($request['path'], intval($request['post']));
     }
 
-    public function run() {
-        foreach($this->metaboxes as $metabox) {
+    public function run()
+    {
+        foreach ($this->metaboxes as $metabox) {
             if ($metabox->registered) {
                 $metabox->run();
             }

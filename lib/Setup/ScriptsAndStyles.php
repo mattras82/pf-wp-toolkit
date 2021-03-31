@@ -99,7 +99,13 @@ class ScriptsAndStyles extends RunableAbstract
 				$this->get('theme.path'),
 				$file
 			);
-		}
+		} else if (strpos($file, $this->get('plugin.directory')) !== false) {
+            $file = str_replace(
+				$this->get('plugin.directory'),
+				$this->get('plugin.path'),
+				$file
+			);
+        }
 
 		if (empty($file) || !file_exists($file))
 			$file = $this->get('theme.path') . 'style.css';
@@ -302,6 +308,8 @@ class ScriptsAndStyles extends RunableAbstract
 
 	public function lazyLoadBlockStyles($html)
 	{
+	    if (pf_is_amp_endpoint() || is_admin()) return $html;
+
 		if (stripos($html, 'wp-block-library-css') && !stripos($html, 'noscript')) {
 			$noscript = "<noscript>$html</noscript>";
 			$start = stripos($html, 'href') + 6;
@@ -315,6 +323,7 @@ class ScriptsAndStyles extends RunableAbstract
 
 	public function lazyLoadBlockStylesScript()
 	{
+	    if (pf_is_amp_endpoint()) return;
 		?>
         <script type="text/javascript">
           if (wp_block_library_css && document.querySelector('[class^="wp-block"], [class^="has-"]')) {

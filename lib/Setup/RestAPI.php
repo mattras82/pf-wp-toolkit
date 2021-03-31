@@ -32,7 +32,7 @@ class RestAPI extends RunableAbstract
     public function registerEndpoints() {
         if (count($this->endpoints) > 0) {
             foreach ($this->endpoints as $route => $options) {
-                register_rest_route('pf_rest/v1/', $route, $options);
+                register_rest_route('pf_rest/v1', $route, $options);
             }
         }
     }

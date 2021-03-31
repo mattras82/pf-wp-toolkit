@@ -25,7 +25,6 @@ class CheckboxType extends BaseType
 
         if (!$this->value)
             $this->value = 'on';
-
     }
 
     /**
@@ -38,13 +37,16 @@ class CheckboxType extends BaseType
                 return '';
         }
 
-        if ((isset($meta[$this->key]) && !empty($meta[$this->key])) || $this->default) {
+        if (!empty($meta[$this->key])) {
             if (is_array($meta[$this->key]) && in_array($this->value, $meta[$this->key])) {
                 $this->field_attr['checked'] = 'checked';
-            } elseif ($meta[$this->key] == $this->value || ($this->default == $this->value && !isset($meta[$this->key]))) {
+            } elseif ($meta[$this->key] == $this->value) {
                 $this->field_attr['checked'] = 'checked';
             }
+        } else if ($this->default == $this->value && !isset($meta[$this->key])) {
+            $this->field_attr['checked'] = 'checked';
         }
+
         $this->field_attr['value'] = $this->value;
 
         return $this->display_field();

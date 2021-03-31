@@ -4,12 +4,12 @@
   "description": "PublicFunction's WordPress Toolkit Plugin",
   "private": false,
   "dependencies": {
-    "@goldencomm/toolkit": "latest",
-    "jquery": "^3.5.1",
-    "jquery-migrate": "^3.2.0"
+    "@goldencomm/toolkit": "^1.0.3",
+    "jquery": "^3.6.0",
+    "jquery-migrate": "^3.3.2"
   },
   "devDependencies": {
-    "@goldencomm/build-scripts": "latest"
+    "@goldencomm/build-scripts": "^1.0.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,8 +20,7 @@
     "last 2 Safari versions",
     "last 2 iOS versions",
     "last 1 Android version",
-    "last 1 ChromeAndroid version",
-    "ie 11"
+    "last 1 ChromeAndroid version"
   ],
   "author": "mattras82",
   "license": "MIT",

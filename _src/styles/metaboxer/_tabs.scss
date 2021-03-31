@@ -17,33 +17,28 @@
     float: left;
     margin: 0 0 -1px 0;
 
-    &:first-child {
-      margin-left: 8px;
-    }
-
     &, > a {
       display: block;
     }
 
     > a {
-      border: 1px solid transparent;
-      padding: 1px 10px 3px;
+      border: 1px solid #ccc;
+      background: #f4f4f4;
+      padding: 5px 10px;
       text-decoration: none;
       font-size: 12px;
       text-transform: capitalize;
-      -webkit-border-top-left-radius: 2px;
       border-top-left-radius: 2px;
-      -webkit-border-top-right-radius: 2px;
       border-top-right-radius: 2px;
       outline: none;
-      -webkit-box-shadow: none;
       box-shadow: none;
     }
 
     &.is-active > a {
-      border-color: #ccc;
-      border-bottom-color: #fff;
+      border-bottom-color: transparent;
       color: #444;
+      background-color: #e6e6e6;
+      cursor: default;
     }
   }
 

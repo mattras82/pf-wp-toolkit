@@ -21,7 +21,7 @@ class Select2Control extends BaseControl
         $placeholder = isset($this->options['placeholder']) ? $this->options['placeholder'] : 'Select one';
         $sid = 'pfwp-customize-select2-'. $this->id;
 
-        if($this->options['google_fonts']) {
+        if(!empty($this->options['google_fonts'])) {
             $this->choices = [];
             $googleFonts = new GoogleFonts(Plugin::getInstance()->container());
 

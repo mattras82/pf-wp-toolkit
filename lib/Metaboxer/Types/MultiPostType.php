@@ -2,6 +2,7 @@
 
 namespace PublicFunction\Toolkit\Metaboxer\Types;
 
+use PublicFunction\Toolkit\Assets\Helpers;
 use \WP_Query;
 
 
@@ -33,6 +34,8 @@ class MultiPostType extends CheckboxesType
      */
     protected $query = [];
 
+    protected $hydrated = false;
+
     /**
      * MultiPostType constructor.
      * @param $args
@@ -48,15 +51,21 @@ class MultiPostType extends CheckboxesType
                 'orderby'   => $this->orderby,
                 'order'     => $this->order
             ];
-            $this->children = [];
-            $this->set_children();
         } elseif (!isset($this->query['post_type'])) {
             $this->query['post_type'] = $this->post_type;
             $this->query['orderby'] = isset($this->query['orderby']) ? $this->query['orderby'] : $this->orderby;
             $this->query['order'] = isset($this->query['order']) ? $this->query['order'] : $this->order;
-            $this->children = [];
-            $this->set_children();
         }
+
+        $helpers = new Helpers();
+
+        foreach($this->query as $key => $val) {
+            $this->query[$key] = $helpers->shortcodeOrCallback($val);
+        }
+
+        $this->hydrated = true;
+        $this->children = [];
+        $this->set_children();
     }
 
     /**
@@ -69,7 +78,7 @@ class MultiPostType extends CheckboxesType
         $output = [];
         $i = 0;
 
-        if (empty($this->query)) return $output;
+        if (!$this->hydrated || empty($this->query)) return $output;
 
         $post_query = new WP_Query($this->query);
         foreach($post_query->posts as $option) {

@@ -251,26 +251,33 @@ if (!function_exists('pf_lazy_image')) {
                     list($width, $height) = $image;
                 }
             }
-        } catch (Exception $e) {
-        }
+        } catch (Exception $e) {}
 
-
-        if (isset($width)) {
+        if (!empty($width)) {
             $attributes .= " width=\"{$width}\"";
         }
 
-        if (isset($height)) {
+        if (!empty($height)) {
             $attributes .= " height=\"{$height}\"";
         }
 
-        if ($width && $height) {
+        if (!empty($width) && !empty($height)) {
             $placeholder = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20height='{$height}'%20width='{$width}'%3E%3C/svg%3E";
         }
 
         $atts['class'] = isset($atts['class']) ? $atts['class'] .= ' no-js' : 'no-js';
 
+        if (!$alt && isset($atts['alt'])) {
+            $alt = $atts['alt'];
+            unset($atts['alt']);
+        }
+
         if (!isset($atts['title']) && substr_compare($src, '.svg', -4) === 0) {
             $atts['title'] = $alt;
+        }
+
+        if (empty($atts['loading'])) {
+            $atts['loading'] = 'lazy';
         }
 
         foreach ($atts as $label => $value) {
@@ -278,8 +285,12 @@ if (!function_exists('pf_lazy_image')) {
             $attributes .= " {$label}=\"{$value}\"";
         }
 
+        $bypass_lazy_load = apply_filters('pf_bypass_lazy_load', defined('REST_REQUEST') && REST_REQUEST && stripos($_SERVER['REQUEST_URI'], 'block-renderer/goldencomm') !== false);
+
+        $template = $bypass_lazy_load ? '<img src="%2$s" alt="%3$s" %4$s />' : '<img src="%1$s" data-src="%2$s" alt="%3$s" %4$s /><noscript><img src="%2$s" alt="%3$s" %4$s /></noscript>';
+
         printf(
-            '<img src="%1$s" data-src="%2$s" alt="%3$s" %4$s><noscript><img src="%2$s" alt="%3$s" %4$s></noscript>',
+            $template,
             $placeholder,
             $src,
             $alt,
@@ -310,19 +321,39 @@ if (!function_exists('pf_lazy_attachment_image')) {
 
 if (!function_exists('pf_breadcrumb')) {
     /**
+     * Outputs either the yoast_breadcrumb or pf_breadcrumb_custom
+     * @param null|array $crumbs
+     */
+    function pf_breadcrumb($crumbs = [], $class = 'breadcrumbs')
+    {
+        $use_yoast = apply_filters(
+            'pf_use_yoast_breadcrumb',
+            function_exists('yoast_breadcrumb')
+                && version_compare('2.0.7', pf_toolkit('theme.version'), '>=')
+        );
+        if ($use_yoast) {
+            yoast_breadcrumb("<p class=\"$class\">", "</p>");
+        } else {
+            pf_breadcrumb_custom($crumbs);
+        }
+    }
+}
+
+if (!function_exists('pf_breadcrumb_custom')) {
+    /**
      * Output a breadcrumb.
      * @param null|array $crumbs
      */
-    function pf_breadcrumb($crumbs = [])
-    {
+    function pf_breadcrumb_custom($crumbs = []) {
+        pf_toolkit('doing_breadcrumb', true);
         ?>
         <nav aria-label="You are here:" role="navigation">
             <ul class="breadcrumbs margin-bottom-0">
                 <li>
                     <?php if (is_front_page()) : ?>
-                        <span class="show-for-sr">Current: </span> Home
+                        <span class="show-for-sr">Current: </span> <?= apply_filters('pf_breadrumb_home', 'Home') ?>
                     <?php else : ?>
-                        <a href="/">Home</a>
+                        <a href="/"><?= apply_filters('pf_breadrumb_home', 'Home') ?></a>
                     <?php endif; ?>
                 </li>
 
@@ -352,7 +383,7 @@ if (!function_exists('pf_breadcrumb')) {
                     <li>
                         <span class="show-for-sr">Current: </span> <?php single_term_title(); ?>
                     </li>
-                <?php elseif (is_home()) : ?>
+                <?php elseif (is_home() && !is_front_page()) : ?>
                     <li>
                         <span class="show-for-sr">Current: </span> <?php single_post_title() ?>
                     </li>
@@ -364,7 +395,7 @@ if (!function_exists('pf_breadcrumb')) {
                     <li>
                         <span class="show-for-sr">Current: </span> <?= apply_filters('pf_404_breadcrumb', __('Page Not Found', pf_toolkit('textdomain'))) ?>
                     </li>
-                <?php elseif (is_singular()) : ?>
+                <?php elseif (is_singular() && !is_front_page()) : ?>
                     <?php
                     $post_type = get_post_type();
                     $post_type_archive_link = get_post_type_archive_link($post_type);
@@ -390,6 +421,17 @@ if (!function_exists('pf_breadcrumb')) {
             </ul>
         </nav>
         <?php
+        pf_toolkit('doing_breadcrumb', false);
+    }
+}
+
+if (!function_exists('pf_is_amp_endpoint')) {
+    /**
+     * Check if page requested is an amp page.
+     * @return bool
+     */
+    function pf_is_amp_endpoint() {
+        return function_exists('is_amp_endpoint') && is_amp_endpoint();
     }
 }
 

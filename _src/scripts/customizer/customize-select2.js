@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-$(document).ready(function() {
+$(function() {
   let $select2 = $('select.select2');
 
   if ($select2.length > 0) {

@@ -53,7 +53,7 @@ class Plugin
                 'short_name' => 'pf-wp-toolkit',
                 'directory' => $_plugin_dir,
                 'path' => $_plugin_path,
-                'version' => '1.0.7',
+                'version' => '1.0.8',
                 'config_path' => $_plugin_path . 'config/',
 
                 // Asset paths and directories
@@ -160,8 +160,16 @@ class Plugin
                 $assets = new ScriptsAndStyles($c);
                 $assets->admin = true;
 
-                $assets->style('pf_admin', $this->theme_or_plugin('assets.dir', 'admin.css'));
-                $assets->script('pf_admin', $this->theme_or_plugin('assets.dir', 'admin.js'), ['jquery']);
+                if (version_compare('2.2.0', $this->config['version'], '>=')) {
+                    $assets->style('gc_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.css');
+                    $assets->script('gc_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.js', ['jquery']);
+                    $assets->style('gc_theme_admin', $this->get("theme.assets.dir") . 'admin.css');
+                    $assets->script('gc_theme_admin', $this->get("theme.assets.dir") . 'admin.js', ['jquery']);
+                } else {
+                    // Deprecated as of 1.2.0
+                    $assets->style('gc_admin', $this->theme_or_plugin('assets.dir', 'admin.css'));
+                    $assets->script('gc_admin', $this->theme_or_plugin('assets.dir', 'admin.js'), ['jquery']);
+                }
 
                 return $assets;
             },
@@ -183,6 +191,10 @@ class Plugin
 					    (isset($this->config['toolkit']['lazy_images']) ? $this->config['toolkit']['lazy_images'] : false)
 				    )
 		    ],
+
+            'local_development' => function (Container &$c) {
+                return new Setup\LocalDevelopment($c);
+            },
 
             'use_jquery_migrate'    => $this->config['use_jquery_migrate']
         ]);

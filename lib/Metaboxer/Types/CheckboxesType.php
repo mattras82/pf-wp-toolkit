@@ -60,6 +60,7 @@ class CheckboxesType extends BaseType
             $option['name'] = $this->name.'[]';
             $option['key'] = $this->key;
             $option['type'] = $this->child_input_type;
+            $option['default'] = $this->default;
             $this->children[] = new $this->child_type($option);
         }
     }
@@ -91,6 +92,9 @@ class CheckboxesType extends BaseType
         foreach($this->children as $child) {
             $child->display($meta);
         }
+
+        if($this->description)
+            echo Markup::tag('p', ['class' => 'pf-metabox-image-description'], $this->description);
 
         echo '</div>';
 

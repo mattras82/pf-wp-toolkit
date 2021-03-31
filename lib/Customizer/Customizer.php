@@ -51,8 +51,9 @@ class Customizer extends RunableAbstract
 
         parent::__construct($container);
 
-        $this->rest_api()->addEndpoint("/customizer/(?P<path>[a-zA-Z|-|_]+)", [
-            'callback' => [$this, 'customizerRest']
+        $this->rest_api()->addEndpoint("/customizer/(?P<path>[a-zA-Z-_.]+)", [
+            'callback' => [$this, 'customizerRest'],
+            'permission_callback'   => '__return_true'
         ]);
     }
 
@@ -106,6 +107,7 @@ class Customizer extends RunableAbstract
 
                     foreach($section['fields'] as $oid => $option) {
                         if (($group !== null) &&
+                            !empty($option['group']) &&
                             (($groupField = $option['group']) &&
                                 ($groupField !== $group)) ||
                             !isset($option['group'])) {
@@ -251,12 +253,13 @@ class Customizer extends RunableAbstract
     public function getDefaults()
     {
         static $defaults = [];
-        if(empty($defaults)) {
+        if(empty($defaults) || pf_toolkit('pf_customizer_rest')) {
             foreach($this->sections() as $sid => $section) {
                 $fields = [];
                 if(!empty($section['fields']) && is_array($section['fields'])) {
                     foreach($section['fields'] as $id => $setting) {
-                        if(strpos($id, 'accordion') !== false || strpos($id, 'field_heading') !== false)
+                        if(strpos($id, 'accordion') !== false || strpos($id, 'field_heading') !== false ||
+                            (!empty($setting['hide_from_rest']) && pf_toolkit('pf_customizer_rest')))
                             continue;
 
                         $fields[$id] = isset($setting['default']) ? $setting['default'] : '';
@@ -310,11 +313,13 @@ class Customizer extends RunableAbstract
      */
     public function customizerRest(\WP_REST_Request $request)
     {
+        pf_toolkit('pf_customizer_rest', true);
+
         if (!isset($request['path'])) {
             return new \WP_Error('pf_no_path', 'Invalid Customizer path', ['status' => 404]);
         }
 
-        return $this->option($request['path']);
+        return $this->option($request['path']);;
     }
 
     /**

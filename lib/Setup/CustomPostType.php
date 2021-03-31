@@ -9,14 +9,25 @@ class CustomPostType extends RunableAbstract
 {
 
     /**
+     * Holds the full object that is read from the JSON file
+     *
      * @var array
      */
     protected $types;
 
     /**
+     * Used as the default for the 'menu_position' argument if it is not set
+     *
      * @var int;
      */
     protected $default_position;
+
+    /**
+     * Used to register any custom dropdown filters for the admin screen
+     *
+     * @var array
+     */
+    protected $taxonomy_columns;
 
     /**
      * CustomPostType constructor.
@@ -29,6 +40,8 @@ class CustomPostType extends RunableAbstract
         $this->types = $this->get_types();
 
         $this->default_position = 10;
+
+        $this->taxonomy_columns = [];
 
     }
 
@@ -122,9 +135,56 @@ class CustomPostType extends RunableAbstract
             if (!taxonomy_exists($key)) {
                 register_taxonomy($key, $post_key, $tax);
             }
+            if (!empty($tax['add_filter_dropdown'])) {
+                if (!isset($this->taxonomy_columns[$post_key])) {
+                    $this->taxonomy_columns[$post_key] = [];
+                }
+                $this->taxonomy_columns[$post_key][] = $key;
+            }
             $taxes[] = $key;
         }
         $args['taxonomies'] = $taxes;
+    }
+
+    public function add_taxonomy_filters($post_type, $which) {
+        if ($which === 'top') {
+            global $wp_taxonomies;
+            foreach($this->taxonomy_columns as $type => $taxes) {
+                if ($post_type === $type) {
+                    foreach($taxes as $tax_key) {
+                        $terms = get_terms([
+                            'taxonomy'  => $tax_key
+                        ]);
+                        if (!empty($terms)) {
+                            $tax_object = $wp_taxonomies[$tax_key];
+                            $this->display_taxonomy_filter($tax_object, $terms);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private function display_taxonomy_filter($tax, $terms) {
+        $key = $tax->name;
+        $singular = $tax->labels->singular_name;
+        $plural = $tax->label;
+        $val = isset($_GET[$key]) ? $_GET[$key] : 0;
+        $key_attr = 'filter-by-'.esc_attr($key);
+        ?>
+        <label for="<?= $key_attr ?>" class="screen-reader-text"><?= __("Filter by $singular") ?></label>
+        <select id="<?= $key_attr ?>" name="<?= esc_attr($key) ?>">
+            <option<?php selected($val, 0) ?> value="0"><?= __("All $plural") ?></option>
+            <?php foreach ($terms as $term) {
+                printf(
+                    "<option %s value='%s'>%s</option>\n",
+                    selected($val, $term->slug, false),
+                    esc_attr($term->slug),
+                    __($term->name)
+                );
+            } ?>
+        </select>
+        <?php
     }
 
     /**
@@ -209,6 +269,7 @@ class CustomPostType extends RunableAbstract
     {
         $this->loader()->addAction('init', [$this, 'register']);
         $this->loader()->addFilter('post_updated_messages', [$this, 'custom_messages']);
+        $this->loader()->addAction('restrict_manage_posts', [$this, 'add_taxonomy_filters'], 20, 2);
     }
 
 }

@@ -64,7 +64,7 @@ function meta_upload() {
   });
 }
 
-$(document).ready(function() {
+$(function() {
   meta_upload();
 });
 

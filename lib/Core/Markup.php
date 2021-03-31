@@ -33,7 +33,7 @@ class Markup
         foreach($attributes as $attribute => $value) {
             if(is_array($value))
                 $value = join(' ', $value);
-
+            $value = esc_attr($value);
             $out[] = "{$attribute}=\"{$value}\"";
         }
 
