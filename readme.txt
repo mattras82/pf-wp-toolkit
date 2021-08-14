@@ -19,6 +19,15 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 
 == Changelog ==
 
+= 1.0.9 =
+
+Released on: 14 Aug 2021
+
+ - Enhancement: Adding LocalDevelopment filter to skip WPCF7's spam verification
+ - Bug Fix: Minor grammar fix in GalleryType's button
+ - Other: Moving from `@goldencomm/toolkit` NPM package to `public-fuction-toolkit`
+ - Other: Miscellaneous fixes & changes
+
 = 1.0.8 =
 
 Released on: 30 Mar 2021

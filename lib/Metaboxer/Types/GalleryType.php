@@ -141,7 +141,7 @@ class GalleryType extends BaseType
             echo Markup::tag('p', ['class' => 'description'], $this->description);
 
         if (!$this->fixed)
-            echo '<a class="button" href="javascript:void(0)" data-gallery-max="' . $this->max_items . '" data-gallery-id-add="' . $this->id . '">Add ' . (array_search(substr($this->button_text, 0, 1), ['a','e']) !== false ? 'an ' : 'a ') . $this->button_text . '</a>';
+            echo '<a class="button" href="javascript:void(0)" data-gallery-max="' . $this->max_items . '" data-gallery-id-add="' . $this->id . '">Add ' . (array_search(substr($this->button_text, 0, 1), ['a','e','i']) !== false ? 'an ' : 'a ') . $this->button_text . '</a>';
 
         $this->display_tabs();
 

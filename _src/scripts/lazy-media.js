@@ -1,7 +1,7 @@
 import {
   Toolkit,
   LazyMedia
-} from "@goldencomm/toolkit";
+} from "public-function-toolkit";
 
 import config from '../../config/config';
 

@@ -329,7 +329,7 @@ if (!function_exists('pf_breadcrumb')) {
         $use_yoast = apply_filters(
             'pf_use_yoast_breadcrumb',
             function_exists('yoast_breadcrumb')
-                && version_compare('2.0.7', pf_toolkit('theme.version'), '>=')
+                && version_compare('2.1.1', pf_toolkit('theme.version'), '>=')
         );
         if ($use_yoast) {
             yoast_breadcrumb("<p class=\"$class\">", "</p>");

@@ -99,6 +99,7 @@ class LocalDevelopment extends RunableAbstract
             $this->loader()->addFilter('wp_calculate_image_srcset', [$this, 'replace_attachment_srcset'], 20);
             $this->loader()->addFilter('wpseo_frontend_presentation', [$this, 'replace_yoast_breadcrumbs']);
             $this->loader()->addFilter('wpcf7_skip_mail', '__return_true', 20);
+            $this->loader()->addFilter('wpcf7_recaptcha_verify_response', '__return_true');
         }
     }
 }
