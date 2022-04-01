@@ -20,6 +20,7 @@ use PublicFunction\Toolkit\Metaboxer\Types\TextareaType;
 use PublicFunction\Toolkit\Metaboxer\Types\TextType;
 use PublicFunction\Toolkit\Metaboxer\Types\WysiwygType;
 use PublicFunction\Toolkit\Metaboxer\Types\GalleryType;
+use WP_Term;
 
 class Metaboxer extends RunableAbstract
 {
@@ -150,6 +151,10 @@ class Metaboxer extends RunableAbstract
         $defaults = $this->get_defaults();
         $boxes = $this->boxes();
         $id = null;
+
+        if ($post instanceof WP_Term) {
+            $object_type = 'term';
+        }
 
         if ($object_type === 'term') {
             $post = get_term($post);

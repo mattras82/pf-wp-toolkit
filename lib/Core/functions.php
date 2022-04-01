@@ -129,8 +129,14 @@ if (!function_exists('pf_partial_shortcode')) {
     function pf_partial_shortcode($atts = [])
     {
         ob_start();
-        if (isset($atts['path']) && !empty($atts['path'])) {
-            pf_partial($atts['path']);
+        if (!empty($atts['path'])) {
+            $args = [];
+            $x = 1;
+            while (!empty($atts["arg.$x.k"])) {
+                $args[$atts["arg.$x.k"]] = $args[$atts["arg.$x.v"]];
+                $x++;
+            }
+            pf_partial($atts['path'], $args);
         }
         return ob_get_clean();
     }

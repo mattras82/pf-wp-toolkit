@@ -1,5 +1,5 @@
 === Public Function WordPress Toolkit Plugin ===
-Tested up to: 5.7
+Tested up to: 5.8.2
 Requires at least: 4.8
 License: GPL-3.0+
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
@@ -18,6 +18,14 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 1. Enable plugin under Wordpress Admin
 
 == Changelog ==
+
+= 1.0.10 =
+
+Released on: 01 Apr 2022
+
+ - Enhancement: Adding ability to pass arguments in `[pf-partial]` shortcode
+ - Bug Fix: Fixing implementation of Metaboxer for taxonomies
+ - Other: Changing the placement of the description text for Checkboxes Metaboxer fields
 
 = 1.0.9 =
 

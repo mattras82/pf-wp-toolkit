@@ -89,12 +89,12 @@ class CheckboxesType extends BaseType
         if ($this->label)
             echo Markup::tag('h4', ['class' => ['field-label', 'field-label-' . $this->type]], $this->label);
 
+        if($this->description)
+            echo Markup::tag('p', ['class' => 'description'], $this->description);
+
         foreach($this->children as $child) {
             $child->display($meta);
         }
-
-        if($this->description)
-            echo Markup::tag('p', ['class' => 'pf-metabox-image-description'], $this->description);
 
         echo '</div>';
 
