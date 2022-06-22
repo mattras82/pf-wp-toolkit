@@ -130,13 +130,19 @@ if (!function_exists('pf_partial_shortcode')) {
     {
         ob_start();
         if (!empty($atts['path'])) {
-            $args = [];
+            $path = $atts['path'];
+            unset($atts['path']);
             $x = 1;
+            // This only works for the Classic Editor.
+            // If using the Shortcode block, simply use the name
+            // of the attribute directly in the shortcode.
             while (!empty($atts["arg.$x.k"])) {
-                $args[$atts["arg.$x.k"]] = $args[$atts["arg.$x.v"]];
+                $atts[$atts["arg.$x.k"]] = $atts[$atts["arg.$x.v"]];
+                unset($atts["arg.$x.k"]);
+                unset($atts["arg.$x.v"]);
                 $x++;
             }
-            pf_partial($atts['path'], $args);
+            pf_partial($path, $atts);
         }
         return ob_get_clean();
     }

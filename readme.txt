@@ -1,5 +1,5 @@
 === Public Function WordPress Toolkit Plugin ===
-Tested up to: 5.8.2
+Tested up to: 6.0
 Requires at least: 4.8
 License: GPL-3.0+
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
@@ -18,6 +18,14 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 1. Enable plugin under Wordpress Admin
 
 == Changelog ==
+
+= 1.0.11 =
+
+Released on: 22 Jun 2022
+
+ - Bug Fix: Fixing ability to pass arguments in `[pf-partial]` shortcode for Gutenberg's shortcode block
+ - Other: Updating label styles for Checkboxes Metaboxer fields
+ - Other: Updating public-function-toolkit & jQuery Migrate to latest versions
 
 = 1.0.10 =
 

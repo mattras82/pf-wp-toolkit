@@ -36,7 +36,7 @@ if (!function_exists('pf_get_meta')) {
 
 if (!function_exists('pf_lazy_meta') && function_exists('pf_lazy_attachment_image')) {
 	/**
-	 * Prints out the lazy load markup for an image in the Customizer
+	 * Prints out the lazy load markup for an image in the given Metaboxer field. Defaults to current post.
 	 * @param string $path
 	 * @param WP_Post|int|string|null
 	 * @param string $size

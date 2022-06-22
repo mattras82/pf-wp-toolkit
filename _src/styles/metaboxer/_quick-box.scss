@@ -32,15 +32,21 @@
     &-checkboxes,
     &-multi_post {
       background: #ffffff;
-      padding: .5em;
+      padding: 0 .5em .5em;
       border: 1px solid #d9d9d9;
       max-width: 300px;
       max-height: 220px;
       overflow: auto;
+      position: relative;
 
       > .field-label {
         font-size: 15px;
         border-bottom: 1px dashed #aaa;
+        padding: .5em 0;
+        position: sticky;
+        color: black;
+        background: #ffffff;
+        top: 0;
       }
 
       label {
