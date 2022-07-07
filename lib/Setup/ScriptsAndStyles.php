@@ -332,7 +332,12 @@ class ScriptsAndStyles extends RunableAbstract
             $link.setAttribute('media', 'all');
             $link.setAttribute('type', 'text/css');
             $link.setAttribute('href', wp_block_library_css);
-            document.head.appendChild($link);
+            var $firstStylesheet = document.head.querySelector('link[rel=stylesheet]');
+            if ($firstStylesheet) {
+                $firstStylesheet.before($link);
+            } else {
+                document.head.prepend($link);
+            }
           }
         </script>
 		<?php

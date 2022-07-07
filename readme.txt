@@ -19,6 +19,13 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 
 == Changelog ==
 
+= 1.1.0 =
+
+Released on: 07 Jul 2022
+
+ - Not-A-Bug Fix: The way that the WP Blocks stylesheet is enqueued on the page is changing to be the first stylesheet in the markup instead of the last. This may introduce some style breaks, but is not likely.
+ - Other: Updating PF JS Toolkit package
+
 = 1.0.11 =
 
 Released on: 22 Jun 2022

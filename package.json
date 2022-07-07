@@ -1,12 +1,12 @@
 {
   "name": "publicfunction-wordpress-toolkit",
-  "version": "1.0.11",
+  "version": "1.1.0",
   "description": "PublicFunction's WordPress Toolkit Plugin",
   "private": false,
   "dependencies": {
     "jquery": "^3.6.0",
     "jquery-migrate": "^3.4.0",
-    "public-function-toolkit": "^1.1.0"
+    "public-function-toolkit": "^1.1.1"
   },
   "devDependencies": {
     "@goldencomm/build-scripts": "^1.0.3"
