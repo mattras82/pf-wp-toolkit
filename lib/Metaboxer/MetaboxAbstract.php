@@ -344,7 +344,7 @@ abstract class MetaboxAbstract extends RunableAbstract
      * @param null|string $parent_key
      * @return array
      */
-    private function _get_single_key_meta($id = null, $defaults = [], $object_type, $parent_key = null)
+    private function _get_single_key_meta($id = null, $defaults = [], $object_type = 'post', $parent_key = null)
     {
         $meta = [];
         if (!$parent_key)

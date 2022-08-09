@@ -4,6 +4,7 @@ namespace PublicFunction\Toolkit\Setup;
 
 use PublicFunction\Toolkit\Core\RunableAbstract;
 use PublicFunction\Toolkit\Core\Container;
+use PublicFunction\Toolkit\Admin\PostsTables;
 
 class CustomPostType extends RunableAbstract
 {
@@ -28,6 +29,12 @@ class CustomPostType extends RunableAbstract
      * @var array
      */
     protected $taxonomy_columns;
+
+    /**
+     * Variable to hold the PostsTables object
+     * @var PostTables
+     */
+    protected $admin_extras;
 
     /**
      * CustomPostType constructor.
@@ -187,6 +194,24 @@ class CustomPostType extends RunableAbstract
         <?php
     }
 
+    private function add_thumbnail_to_admin_table($key) {
+        if (!$this->admin_extras) {
+            $this->admin_extras = new PostsTables($this->container);
+        }
+        add_filter('manage_'.$key.'_posts_columns', function($columns) use ($key) {
+            $post_object = get_post_type_object($key);
+            $featured_label = $post_object->labels->featured_image;
+            if (!isset($columns['image'])) {
+                // Adding the column here will trigger the imageColumn function
+                // to run because of the generalized filter used in PostsTables
+                $columns = $this->admin_extras->insertBefore('date', $columns, [
+                    'image' => __($featured_label, pf_toolkit('textdomain')),
+                ]);
+            }
+            return $columns;
+        });
+    }
+
     /**
      * @param array $messages Existing post update messages.
      * @return array Amended post update messages with new CPT update messages.
@@ -255,6 +280,10 @@ class CustomPostType extends RunableAbstract
             foreach ($this->types as $key => &$args) {
                 if (isset($args['taxonomies'])) {
                     $this->handleTax($key, $args);
+                }
+                if (!empty($args['show_thumb_in_admin'])) {
+                    $this->add_thumbnail_to_admin_table($key);
+                    unset($args['show_thumb_in_admin']);
                 }
                 if (post_type_exists($key)) {
                     $this->edit_type($key, $args);

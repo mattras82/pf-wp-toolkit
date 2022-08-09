@@ -39,7 +39,7 @@ class PostsTables extends RunableAbstract
      * @param array $pairs
      * @return array
      */
-    private function insertBefore($key, $array, $pairs) {
+    public function insertBefore($key, $array, $pairs) {
         if(array_key_exists($key, $array)) {
             $new = [];
             foreach($array as $k => $value) {

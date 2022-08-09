@@ -1,5 +1,5 @@
 === Public Function WordPress Toolkit Plugin ===
-Tested up to: 6.0
+Tested up to: 6.0.1
 Requires at least: 4.8
 License: GPL-3.0+
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
@@ -18,6 +18,13 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 1. Enable plugin under Wordpress Admin
 
 == Changelog ==
+
+= 1.1.1 =
+
+Released on: 09 Aug 2022
+
+ - Enhancement: Adding support for displaying post thumbnail for custom post types via the `show_thumb_in_admin` flag in JSON file
+ - Other: Fixing some PHP 8 warnings
 
 = 1.1.0 =
 
