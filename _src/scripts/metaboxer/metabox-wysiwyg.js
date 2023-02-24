@@ -8,7 +8,7 @@ function getWysiwygIDs(container, remove = false) {
     if (typeof tinymce === 'undefined') return;
     let id = this.getAttribute('for');
     let editor = tinymce.editors[id];
-    // Remove the editor instance so there's no conflicts later
+    // Remove the editor instance so there are no conflicts later
     if (remove && typeof editor !== 'undefined') editor.remove();
     ids.push(id);
   });

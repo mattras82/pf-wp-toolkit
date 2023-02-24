@@ -53,7 +53,7 @@ class Plugin
                 'short_name' => 'pf-wp-toolkit',
                 'directory' => $_plugin_dir,
                 'path' => $_plugin_path,
-                'version' => '1.1.1',
+                'version' => '1.1.2',
                 'config_path' => $_plugin_path . 'config/',
 
                 // Asset paths and directories
@@ -87,15 +87,16 @@ class Plugin
 	    $this->container->bulkSet([
             // Reset theme array now that we have config values
 		    'theme' => [
-			    'name' => isset($this->config['theme']['name']) ? $this->config['theme']['name'] : null,
-			    'short_name' => isset($this->config['theme']['short_name']) ? $this->config['theme']['short_name'] : null,
-			    'directory' => $_theme_dir,
-			    'path' => $_theme_path,
-			    'version' => $this->config['version'],
-			    'config_path' => trailingslashit($_theme_path . 'config'),
-			    'icon'      => isset($this->config['styles']['icon']) ? $this->config['styles']['icon'] : null,
-			    'build' => $this->config['build'] ?: $this->config['version'],
-			    'partials' => untrailingslashit($_theme_path . (isset($this->config['theme']['partials']) ? $this->config['theme']['partials'] : 'templates/partials')),
+			    'name'          => isset($this->config['theme']['name']) ? $this->config['theme']['name'] : null,
+			    'short_name'    => isset($this->config['theme']['short_name']) ? $this->config['theme']['short_name'] : null,
+			    'directory'     => $_theme_dir,
+			    'path'          => $_theme_path,
+			    'version'       => $this->config['version'],
+			    'config_path'   => trailingslashit($_theme_path . 'config'),
+			    'icon'          => isset($this->config['styles']['icon']) ? $this->config['styles']['icon'] : null,
+			    'build'         => $this->config['build'] ?: $this->config['version'],
+	            'image'         => isset($this->config['styles']['image']) ? $this->config['styles']['image'] : null,
+			    'partials'      => untrailingslashit($_theme_path . (isset($this->config['theme']['partials']) ? $this->config['theme']['partials'] : 'templates/partials')),
 
 			    // Asset paths and directories
 			    // -------------------------------------
@@ -161,14 +162,14 @@ class Plugin
                 $assets->admin = true;
 
                 if (version_compare('2.2.0', $this->config['version'], '>=')) {
-                    $assets->style('gc_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.css');
-                    $assets->script('gc_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.js', ['jquery']);
-                    $assets->style('gc_theme_admin', $this->get("theme.assets.dir") . 'admin.css');
-                    $assets->script('gc_theme_admin', $this->get("theme.assets.dir") . 'admin.js', ['jquery']);
+                    $assets->style('pf_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.css');
+                    $assets->script('pf_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.js', ['jquery']);
+                    $assets->style('pf_theme_admin', $this->get("theme.assets.dir") . 'admin.css');
+                    $assets->script('pf_theme_admin', $this->get("theme.assets.dir") . 'admin.js', ['jquery']);
                 } else {
                     // Deprecated as of 1.2.0
-                    $assets->style('gc_admin', $this->theme_or_plugin('assets.dir', 'admin.css'));
-                    $assets->script('gc_admin', $this->theme_or_plugin('assets.dir', 'admin.js'), ['jquery']);
+                    $assets->style('pf_admin', $this->theme_or_plugin('assets.dir', 'admin.css'));
+                    $assets->script('pf_admin', $this->theme_or_plugin('assets.dir', 'admin.js'), ['jquery']);
                 }
 
                 return $assets;

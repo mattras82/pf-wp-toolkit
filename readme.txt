@@ -19,6 +19,13 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 
 == Changelog ==
 
+= 1.1.2 =
+
+Released on: 24 Feb 2023
+
+ - Enhancement: Adding support to bypass custom lazy loading
+ - Other: Typo fix
+
 = 1.1.1 =
 
 Released on: 09 Aug 2022

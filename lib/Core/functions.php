@@ -297,7 +297,19 @@ if (!function_exists('pf_lazy_image')) {
             $attributes .= " {$label}=\"{$value}\"";
         }
 
-        $bypass_lazy_load = apply_filters('pf_bypass_lazy_load', defined('REST_REQUEST') && REST_REQUEST && stripos($_SERVER['REQUEST_URI'], 'block-renderer/goldencomm') !== false);
+        $bypass_lazy_load = false;
+
+        // Don't lazy load the image if we're rendering a block for the editor
+        if (defined('REST_REQUEST') && REST_REQUEST && stripos($_SERVER['REQUEST_URI'], 'block-renderer') !== false) {
+            $bypass_lazy_load = true;
+        }
+
+        // Don't lazy load if the theme is configured to use browser native loading
+        if (pf_toolkit('theme.image.lazy') === 'native') {
+            $bypass_lazy_load = true;
+        }
+
+        $bypass_lazy_load = apply_filters('pf_bypass_lazy_load', $bypass_lazy_load);
 
         $template = $bypass_lazy_load ? '<img src="%2$s" alt="%3$s" %4$s />' : '<img src="%1$s" data-src="%2$s" alt="%3$s" %4$s /><noscript><img src="%2$s" alt="%3$s" %4$s /></noscript>';
 
