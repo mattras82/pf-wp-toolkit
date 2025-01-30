@@ -5,6 +5,7 @@ namespace PublicFunction\Toolkit\Setup;
 
 use PublicFunction\Toolkit\Core\Container;
 use PublicFunction\Toolkit\Core\RunableAbstract;
+use WP_REST_Server;
 
 class RestAPI extends RunableAbstract
 {
@@ -22,7 +23,7 @@ class RestAPI extends RunableAbstract
         if (!is_array($options) || !isset($options['callback'])) {
             return false;
         }
-        if (!isset($options['methods'])) $options['methods'] = 'GET';
+        if (!isset($options['methods'])) $options['methods'] = \WP_REST_Server::READABLE;
 
         $this->endpoints[$route] = $options;
 

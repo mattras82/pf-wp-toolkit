@@ -92,6 +92,7 @@ class Metabox extends MetaboxAbstract
         if (is_string($this->fields)) {
             $this->fields = $helper->shortcodeOrCallback($this->fields);
         }
+        // TODO: Maybe run register_meta() here so we can add fields to revisions?
         if ($this->fields && is_array($this->fields)) {
             $this->type_classes = Metaboxer::get_type_classes();
             foreach ($this->fields as $field_key => $field) {

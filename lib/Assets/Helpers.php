@@ -9,7 +9,9 @@ class Helpers
      * @param string $string
      * @return mixed|string
      */
-    public function shortcodeOrCallback($string) {
+    public function shortcodeOrCallback($string = '') {
+        if (!is_string($string)) return $string;
+
         $string = trim($string);
 
         if(substr($string, 0, 2) == '[[' ) {

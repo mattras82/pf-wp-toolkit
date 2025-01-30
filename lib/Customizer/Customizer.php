@@ -106,19 +106,17 @@ class Customizer extends RunableAbstract
                     $group = null;
 
                     foreach($section['fields'] as $oid => $option) {
-                        if (($group !== null) &&
-                            !empty($option['group']) &&
-                            (($groupField = $option['group']) &&
-                                ($groupField !== $group)) ||
-                            !isset($option['group'])) {
+                        if ($group !== null &&
+                            (empty($option['group']) ||
+                                $option['group']!== $group)) {
                             $this->groupFooter($sid, $group);
-                            if (!isset($option['group'])) {
+                            if (empty($option['group'])) {
                                 $group = null;
                             }
                         }
-                        if (isset($option['group']) && ($groupField = $option['group']) &&
-                            ($groupField !== $group)) {
-                            $group = $groupField;
+                        if (!empty($option['group']) &&
+                            $option['group'] !== $group) {
+                            $group = $option['group'];
                             $this->groupHeader($sid, $group);
                         }
                         $this->registerSetting($sid, $oid, $option);

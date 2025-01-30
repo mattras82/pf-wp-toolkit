@@ -259,12 +259,16 @@ class CustomPostType extends RunableAbstract
     {
         global $wp_post_types;
 
-        if (is_array($args['labels'])) {
+        if (!empty($args['labels']) && is_array($args['labels'])) {
             $labels = &$wp_post_types[$key]->labels;
             foreach ($args['labels'] as $name => $value) {
                 $labels->{$name} = $value;
             }
             unset($args['labels']);
+        }
+        if (!empty($args['supports']) && is_array($args['supports'])) {
+            add_post_type_support($key, $args['supports']);
+            unset($args['supports']);
         }
         foreach ($args as $prop => $value) {
             $wp_post_types[$key]->{$prop} = $value;
