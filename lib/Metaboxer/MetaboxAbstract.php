@@ -34,7 +34,7 @@ abstract class MetaboxAbstract extends RunableAbstract
      * The name of the box, used for the title and html ID
      * @var string
      */
-    protected $name = 'GC Metabox';
+    protected $name = 'PF Metabox';
 
     /**
      * The html ID used by the metabox html elements
@@ -231,6 +231,16 @@ abstract class MetaboxAbstract extends RunableAbstract
     }
 
     /**
+     * Returns the name of the metabox
+     *
+     * @return string
+     */
+    public function get_name()
+    {
+        return $this->name;
+    }
+
+    /**
      * Sets the post type of the metabox
      * @param string $type
      * @return $this
@@ -408,7 +418,7 @@ abstract class MetaboxAbstract extends RunableAbstract
 
     /**
      * Static wrapper for getMeta
-     * @param  \WP_Post|int $post_id
+     * @param  \WP_Post|\WP_Term|int $id
      * @param  string $key
      * @return mixed
      */

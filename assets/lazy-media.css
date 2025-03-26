@@ -1,1 +1,0 @@
-.loaded,.loading,.queued{transition:opacity .2s ease-in-out}.loading,.queued{background-color:#eaeaea;opacity:.5}.loading:not([width]),.queued:not([width]){min-width:55px}.loading:not([height]),.queued:not([height]){min-height:55px}

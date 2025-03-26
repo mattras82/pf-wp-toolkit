@@ -8,6 +8,8 @@ use PublicFunction\Toolkit\Core\Container;
 use PublicFunction\Toolkit\Metaboxer\Types\BaseType;
 use PublicFunction\Toolkit\Metaboxer\Types\ImageType;
 use PublicFunction\Toolkit\Metaboxer\Types\GalleryType;
+use WP_REST_Request;
+use WP_REST_Server;
 
 class Metabox extends MetaboxAbstract
 {
@@ -17,9 +19,11 @@ class Metabox extends MetaboxAbstract
     protected $add_callback;
     protected $callback_args = [];
     protected $type_classes = [];
+    protected $revisions_enabled = true;
     protected $taxonomy;
     protected $helper;
     protected $storage_name = 'pf_metabox';
+    protected $fields_registered = false;
 
     public $registered = false;
 
@@ -92,24 +96,98 @@ class Metabox extends MetaboxAbstract
         if (is_string($this->fields)) {
             $this->fields = $helper->shortcodeOrCallback($this->fields);
         }
-        // TODO: Maybe run register_meta() here so we can add fields to revisions?
         if ($this->fields && is_array($this->fields)) {
             $this->type_classes = Metaboxer::get_type_classes();
             foreach ($this->fields as $field_key => $field) {
-                $this->defaults[$field_key] = isset($field['default']) ? $helper->shortcodeOrCallback($field['default']) : '';
                 if (array_key_exists($field['type'], $this->type_classes)) {
                     $field['id'] = $this->get_html_id($field_key);
                     $field['name'] = $this->get_input_name($field_key);
                     $field['key'] = $field_key;
                     $fieldClass = new $this->type_classes[$field['type']]($field);
+                    $fieldClass->add_default($this->defaults);
                     $this->fields[$field_key] = $fieldClass;
-                    if ($fieldClass instanceof ImageType)
-                        $this->defaults[$field_key . '_id'] = '';
-                    if ($this->use_single_keys && $fieldClass instanceof GalleryType)
-                        $this->defaults[$field_key . '_data'] = '';
+                } else {
+                    _doing_it_wrong(__FUNCTION__, "{$field['type']} is not a valid field type for Metaboxer", '1.2.0');
                 }
             }
         }
+    }
+
+    public function get_field($name = '')
+    {
+        if (isset($this->fields[$name])) {
+            return $this->fields[$name];
+        }
+        return null;
+    }
+
+    public function registerFields()
+    {
+        if (!$this->fields_registered) {
+            $object_type = empty($this->taxonomy) ? 'post' : 'term';
+            if (!empty($this->taxonomy)) {
+                $this->revisions_enabled = false;
+            } else if ($this->revisions_enabled) {
+                foreach ((array) $this->post_type as $type) {
+                    $this->revisions_enabled = $this->revisions_enabled && post_type_supports($type, 'revisions');
+                }
+            }
+            $register_args = [
+                'object_subtype' => $object_type == 'post' && is_string($this->post_type) ? $this->post_type : ($object_type == 'term' && is_string($this->taxonomy) ? $this->taxonomy : ''),
+                'single'        => true,
+                'revisions_enabled' => $this->revisions_enabled
+            ];
+            if ($this->is_single()) {
+                foreach ($this->fields as $field) {
+                    if ($field instanceof BaseType) {
+                        $field->register_field($object_type, $this->metakey, $register_args);
+                    }
+                }
+            } else {
+                $args = wp_parse_args([
+                    'label'         => $this->name,
+                    'default'       => $this->defaults,
+                    'show_in_rest'  => [
+                        'schema'    => [
+                            'items' => [
+                                'type'   => [
+                                    'string',
+                                    'number',
+                                    'integer',
+                                    'boolean'
+                                ]
+                            ]
+                        ]
+                    ],
+                    'type'          => 'array',
+                ], $register_args);
+                register_meta($object_type, $this->metakey, $args);
+            }
+            $this->fields_registered = true;
+        }
+    }
+
+    /**
+     * WP core's autosave code sends modified data for some of our meta fields.
+     * So we're going to remove that data from the autosave request so that
+     * the core code copies our meta data over from the original post.
+     *
+     * @param  mixed $result
+     * @param  WP_Rest_Server $server
+     * @param  WP_REST_Request $request
+     * @return mixed
+     */
+    public function removeFieldsFromAutosave($result, WP_REST_Server $server, WP_REST_Request $request) {
+        $meta = $request->get_param( 'meta' );
+        if (is_array($meta)) {
+            foreach ($this->defaults as $key => $val) {
+                if (!empty($meta["{$this->metakey}_{$key}"])) {
+                    unset($meta["{$this->metakey}_{$key}"]);
+                }
+            }
+            $request->set_param('meta', $meta);
+        }
+        return $result;
     }
 
     /**
@@ -254,7 +332,7 @@ class Metabox extends MetaboxAbstract
      */
     private function registeredMetaboxes()
     {
-        return $this->get($this->storage_name) ? $this->get($this->storage_name) : [];
+        return $this->get($this->storage_name) ?: [];
     }
 
     /**
@@ -373,5 +451,14 @@ class Metabox extends MetaboxAbstract
 
         $this->loader()->addAction('wp_ajax_' . $this->metakey . '_refresh', [$this, 'refresh']);
         $this->loader()->addAction('wp_loaded', [$this, 'setupFields']);
+        // The REST API requires field registration on its init hook,
+        // but that is only run for REST requests. So we catch front end
+        // calls after REST would have run with send_headers. Admin pages
+        // (like Revisions) also need the fields registered.
+        //
+        $this->loader()->addAction('rest_api_init', [$this, 'registerFields']);
+        $this->loader()->addAction('send_headers', [$this, 'registerFields']);
+        $this->loader()->addAction('admin_init', [$this, 'registerFields']);
+        $this->loader()->addAction('rest_pre_dispatch', [$this, 'removeFieldsFromAutosave'], 10, 3);
     }
 }

@@ -1,51 +1,54 @@
-&-range-slider {
-  input[type="range"] {
-    -webkit-appearance: none;
-    display: block;
-    width: 73%;
-    float: left;
-    background: linear-gradient(to right, #e0e0e0 0%, #e0e0e0 100%);
-    background-size: 100% 10px;
-    background-position: center;
-    background-repeat: no-repeat;
-
-    overflow: hidden;
-    outline: none;
-    zoom: 130%;
-
-    &::-webkit-slider-thumb {
+@mixin range-slider {
+  &-range-slider {
+    input[type="range"] {
       -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      background: #f7f7f7;
-      position: relative;
-      z-index: 5;
-      border: 1px solid #ccc;
-      border-bottom-width: 2px;
-      box-shadow: inset 1px 1px 0 #fff;
-      cursor: pointer;
+      display: block;
+      width: 73%;
+      float: left;
+      background: linear-gradient(to right, #e0e0e0 0%, #e0e0e0 100%);
+      background-size: 100% 10px;
+      background-position: center;
+      background-repeat: no-repeat;
 
-      &:hover {
-        border-color: #999;
-      }
+      overflow: hidden;
+      outline: none;
+      zoom: 130%;
 
-      &:after {
-        content: " ";
-        width: 999em;
-        height: 10px;
-        position: absolute;
-        z-index: 0;
-        right: 19px;
-        top: 5px;
-        background: #e14d43;
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        background: #f7f7f7;
+        position: relative;
+        z-index: 5;
+        border: 1px solid #ccc;
+        border-bottom-width: 2px;
+        box-shadow: inset 1px 1px 0 #fff;
+        cursor: pointer;
+
+        &:hover {
+          border-color: #999;
+        }
+
+        &:after {
+          content: " ";
+          width: 999em;
+          height: 10px;
+          position: absolute;
+          z-index: 0;
+          right: 19px;
+          top: 5px;
+          background: #e14d43;
+        }
       }
     }
-  }
 
-  input[type="number"] {
-    width: 25%;
-    float: right;
-    border-radius: 3px;
+    input[type="number"] {
+      width: 25%;
+      float: right;
+      border-radius: 3px;
+    }
   }
 }
+

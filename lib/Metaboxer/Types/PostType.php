@@ -69,6 +69,7 @@ class PostType extends SelectType
 
     /**
      * @inheritdoc
+     * @param  WP_Post $child The child object to render
      */
     public function get_child_markup($child, $meta) {
         $attr = [
@@ -78,6 +79,16 @@ class PostType extends SelectType
             $attr['selected'] = 'selected';
         }
         return Markup::tag('option', $attr, $child->post_title);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function setup_register_args($args) {
+        $args['type'] = 'integer';
+        $args['default'] = (int) $this->default;
+
+        return parent::setup_register_args($args);
     }
 
 }

@@ -16,6 +16,6 @@
   "use_metaboxer": false,
   "use_custom_post_types": false,
   "use_jquery_migrate": false,
-  "version": "1.1.3",
+  "version": "1.2.0-rc",
   "build": "2kwwb0z2"
 }

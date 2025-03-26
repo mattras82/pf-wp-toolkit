@@ -16,7 +16,7 @@
  * Plugin Name:       PF WP Toolkit
  * Plugin URI:        github.com/mattras82/pf-wp-toolkit
  * Description:       This plugin adds developer-friendly functionality for WordPress Customizer, metaboxes, custom post types, and more.
- * Version:           1.1.3
+ * Version:           1.2.0-rc
  * Author:            Public Function
  * Author URI:        publicfunction.site
  * License:           GPL-3.0+

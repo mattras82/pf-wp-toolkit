@@ -50,6 +50,9 @@ class GalleryType extends BaseType
 
         $this->field_attr['type'] = 'hidden';
         $this->button_text = $this->button_text ?: 'panel';
+        if (empty($this->default)) {
+            $this->default = 1;
+        }
     }
 
     /**
@@ -61,7 +64,7 @@ class GalleryType extends BaseType
         $x = 0;
         $this->type_classes = Metaboxer::get_type_classes();
         if (!$this->field_attr['value'])
-            $this->field_attr['value'] = ($this->default ? $this->default : 1);
+            $this->field_attr['value'] = $this->default;
 
         if (is_string($this->fields)) {
             $helper = new Helpers();
@@ -99,9 +102,8 @@ class GalleryType extends BaseType
      */
     public function display($meta)
     {
-        if (is_callable($this->add_callback)) {
-            if (!call_user_func($this->add_callback, $this->callback_args))
-                return '';
+        if (!$this->maybe_show($meta)) {
+            return '';
         }
 
         if (isset($meta[$this->key])) {
@@ -141,7 +143,7 @@ class GalleryType extends BaseType
             echo Markup::tag('p', ['class' => 'description'], $this->description);
 
         if (!$this->fixed)
-            echo '<a class="button" href="javascript:void(0)" data-gallery-max="' . $this->max_items . '" data-gallery-id-add="' . $this->id . '">Add ' . (array_search(substr($this->button_text, 0, 1), ['a','e','i']) !== false ? 'an ' : 'a ') . $this->button_text . '</a>';
+            echo '<a class="button" href="javascript:void(0)" data-gallery-max="' . $this->max_items . '" data-gallery-id-add="' . $this->id . '">Add ' . (array_search(substr($this->button_text, 0, 1), ['a', 'e', 'i']) !== false ? 'an ' : 'a ') . $this->button_text . '</a>';
 
         $this->display_tabs();
 
@@ -188,5 +190,94 @@ class GalleryType extends BaseType
     protected function get_numbers()
     {
         return ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen', 'Twenty', 'Twenty One', 'Twenty Two', 'Twenty Three', 'Twenty Four', 'Twenty Five', 'Twenty Six', 'Twenty Seven', 'Twenty Eight', 'Twenty Nine', 'Thirty'];
+    }
+
+    /**
+     * Adds this field & the additional media post ID to default array
+     * @inheritdoc
+     */
+    public function add_default(&$defaults)
+    {
+
+        $defaults[$this->key] = $this->default;
+        $defaults["{$this->key}_data"] = '';
+
+        return $defaults;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function setup_register_args($args)
+    {
+        $args['type'] = 'integer';
+        $args['default'] = (int) $this->default;
+        $args['label'] = "{$this->label} " . ucwords($this->button_text) . ' Count';
+
+        return parent::setup_register_args($args);
+    }
+
+    /**
+     * Registers this field & the Media ID field
+     * @inheritdoc
+     */
+    public function register_field($object_type, $prefix, $args = [])
+    {
+
+        $args = $this->setup_register_args($args);
+        $success = $this->register_meta($object_type, "{$prefix}_{$this->key}", $args);
+        if ($success) {
+            // Register the data field
+            //
+            $args['type'] = 'array';
+            $args['label'] = $this->label;
+            $args['default'] = [];
+            if ($args['show_in_rest']) {
+                $args['show_in_rest'] = [
+                    'schema'    => [
+                        'items' => [
+                            'type'   => [
+                                'string',
+                                'number',
+                                'integer',
+                                'boolean'
+                            ]
+                        ]
+                    ],
+                    'prepare_callback'  => function ($value) {
+                        if (is_array($value)) {
+                            $field_count = 0;
+                            foreach($this->fields as $field) {
+                                // Need to account for extra ID fields
+                                if (in_array($field['type'], ['image', 'media'])) {
+                                    $field_count++;
+                                }
+                                $field_count++;
+                            }
+                            $new_value = array();
+                            $i = 0;
+                            $x = 0;
+                            foreach($value as $key => $val) {
+                                $key = str_replace("_{$i}", '', $key);
+                                if (empty($new_value[$i])) {
+                                    $new_value[$i] = array();
+                                }
+                                $new_value[$i][$key] = $val;
+                                $x++;
+                                if ($x === $field_count) {
+                                    $i++;
+                                    $x = 0;
+                                }
+                            }
+                            return $new_value;
+                        }
+                        return [];
+                    }
+                ];
+            }
+            $success = $this->register_meta($object_type, "{$prefix}_{$this->key}_data", $args);
+        }
+
+        return $success;
     }
 }

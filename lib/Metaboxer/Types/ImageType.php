@@ -15,12 +15,12 @@ class ImageType extends BaseType
     /**
      * @var string
      */
-    protected $media_type;
+    protected $media_type = 'image';
 
     /**
      * @var string
      */
-    protected $media_label;
+    protected $media_label = 'image';
 
     public function __construct($args)
     {
@@ -28,18 +28,14 @@ class ImageType extends BaseType
 
         if (!$this->preview_size)
             $this->preview_size = 'medium';
-
-        $this->media_type = 'image';
-        $this->media_label = 'image';
     }
 
     /**
      * @inheritdoc
      */
     public function display($meta) {
-        if (is_callable($this->add_callback)) {
-            if (!call_user_func($this->add_callback, $this->callback_args))
-                return '';
+        if (!$this->maybe_show($meta)) {
+            return '';
         }
 
         if (isset($meta[$this->key]))
@@ -125,5 +121,35 @@ class ImageType extends BaseType
         ], Markup::tag('img', ['src' => $src, 'alt' => 'Image preview']));
     }
 
+    /**
+     * Adds this field & the additional media post ID to default array
+     * @inheritdoc
+     */
+    public function add_default(&$defaults) {
 
+        $defaults[$this->key] = $this->default;
+        $defaults["{$this->key}_id"] = '';
+
+        return $defaults;
+    }
+
+    /**
+     * Registers this field & the Media ID field
+     * @inheritdoc
+     */
+    public function register_field($object_type, $prefix, $args = []) {
+
+        $args = $this->setup_register_args($args);
+        $success = $this->register_meta($object_type, "{$prefix}_{$this->key}", $args);
+        if ($success) {
+            // Register the ID field
+            //
+            $args['type'] = 'integer';
+            $args['label'] .= ' Media ID';
+            unset($args['default']);
+            $success = $this->register_meta($object_type, "{$prefix}_{$this->key}_id", $args);
+        }
+
+        return $success;
+    }
 }

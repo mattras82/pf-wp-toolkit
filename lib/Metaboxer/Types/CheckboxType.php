@@ -32,9 +32,8 @@ class CheckboxType extends BaseType
      */
     public function display($meta)
     {
-        if (is_callable($this->add_callback)) {
-            if (!call_user_func($this->add_callback, $this->callback_args))
-                return '';
+        if (!$this->maybe_show($meta)) {
+            return '';
         }
 
         if (!empty($meta[$this->key])) {
@@ -64,7 +63,7 @@ class CheckboxType extends BaseType
             'class' => ['field-label', 'field-label-' . $this->type]
         ], $this->field_html() . Markup::tag('span', [], $this->label));
 
-        if($this->description)
+        if ($this->description)
             echo Markup::tag('p', ['class' => 'description'], $this->description);
 
         echo '</div>';
@@ -72,4 +71,29 @@ class CheckboxType extends BaseType
         return true;
     }
 
+    /**
+     * @inheritdoc
+     */
+    protected function setup_register_args($args)
+    {
+        $args['type'] = 'boolean';
+        $args['default'] = $this->default == $this->value;
+
+        $args = parent::setup_register_args($args);
+
+        if ($args['show_in_rest']) {
+            $args['show_in_rest'] = [
+                'prepare_callback'  => function ($value) {
+                    if (is_array($value)) {
+                        return in_array($this->value, $value);
+                    } else if (!empty($value)) {
+                        return $this->value == $value;
+                    }
+                    return $this->default == $this->value;
+                }
+            ];
+        }
+
+        return $args;
+    }
 }

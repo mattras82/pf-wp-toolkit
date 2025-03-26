@@ -73,7 +73,7 @@ class CustomPostType extends RunableAbstract
             'menu_position' => $this->default_position,
             'map_meta_cap' => true,
             'menu_icon' => 'dashicons_admin_tools',
-            'supports' => ['title', 'excerpt', 'thumbnail', 'revisions', 'editor'],
+            'supports' => ['title', 'excerpt', 'thumbnail', 'revisions', 'editor', 'custom-fields'],
             'has_archive' => $key . 's',
             'labels' => $this->get_default_labels($singular, $plural),
             'rewrite' => ['slug' => $key, 'with_front' => false]

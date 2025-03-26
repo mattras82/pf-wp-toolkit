@@ -1,4 +1,9 @@
-@import "mixins";
+@use "sass:meta";
+@use "mixins";
+@use "customizer/accordion";
+@use "customizer/range-slider";
+@use "customizer/switch";
+@use "customizer/layout";
 
 .pfwp-customize {
   &-control {
@@ -12,19 +17,19 @@
     }
   }
 
-  @import "customizer/accordion";
-  @import "customizer/range-slider";
-  @import "customizer/switch";
-  @import "customizer/layout";
+  @include accordion.accordion;
+  @include layout.layout;
+  @include range-slider.range-slider;
+  @include switch.switch;
 }
 
 [id*="pf-metabox"] {
-  @import "metaboxer/quick-box";
-  @import "metaboxer/image-quick-box";
-  @import "metaboxer/tabs";
+  @include meta.load-css("metaboxer/quick-box");
+  @include meta.load-css("metaboxer/image-quick-box");
+  @include meta.load-css("metaboxer/tabs");
 
   &.termbox {
-    @import "metaboxer/term-box";
+    @include meta.load-css("metaboxer/term-box");
   }
 }
 

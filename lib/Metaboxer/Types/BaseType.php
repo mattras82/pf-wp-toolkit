@@ -66,9 +66,9 @@ abstract class BaseType
 
     /**
      * Argument passed to the function named in add_callback
-     * @var mixed
+     * @var array
      */
-    protected $callback_args;
+    protected $callback_args = [];
 
     /**
      * This holds a string that is set to a [data] attribute on the field for an AJAX refresh action handled through JS
@@ -82,23 +82,38 @@ abstract class BaseType
      */
     protected $required;
 
-    public function __construct($args) {
+    /**
+     * Flag to prevent this field from appearing in REST responses
+     *
+     * @var boolean
+     */
+    protected $hide_from_rest;
+
+    /**
+     * Flag used in register_field to add this field to post revisions
+     *
+     * @var boolean
+     */
+    protected $revisions_enabled;
+
+    public function __construct($args)
+    {
 
         // Go through each property and set them as part of this
         // class instance
-        foreach($args as $property => $value) {
-            if($value === null)
+        foreach ($args as $property => $value) {
+            if ($value === null)
                 continue;
-            elseif(method_exists($this, $property))
+            elseif (method_exists($this, $property))
                 $this->{$property}($value);
-            elseif(property_exists($this, $property))
+            elseif (property_exists($this, $property))
                 $this->{$property} = $value;
         }
 
         // Process a shortcode or callback in the default field
         // See inc\lib\Assets\Helpers.php for available methods
         $helper = new Helpers();
-        $this->default = $helper->shortcodeOrCallback($this->default);
+        $this->default = $helper->shortcodeOrCallback($this->default) ?: '';
         // Initializes the base HTML attributes for the input field
         $this->field_attr['type'] = $this->type;
         $this->field_attr['id'] = $this->id;
@@ -110,14 +125,27 @@ abstract class BaseType
             $this->field_attr['data-refresh-on'] = $this->refresh_on;
     }
 
+    protected function maybe_show($meta)
+    {
+        $show = true;
+        if (is_callable($this->add_callback)) {
+            $args = wp_parse_args([
+                'meta'      => $meta,
+                'default'   => $this->default
+            ], $this->callback_args);
+            $show = call_user_func($this->add_callback, $args);
+        }
+        return $show;
+    }
+
     /**
      * This function handles how each Metabox type will be displayed.
      * Returns the HTML as a string to be displayed in the admin.
      * @return string
      */
-    public function display($meta) {
-        if (is_callable($this->add_callback)) {
-            if (!call_user_func($this->add_callback, $this->callback_args))
+    public function display($meta)
+    {
+        if (!$this->maybe_show($meta)) {
                 return '';
         }
 
@@ -131,8 +159,9 @@ abstract class BaseType
      * Wraps a field with a div.field element
      * @return string
      */
-    protected function display_field_wrap() {
-        return '<div class="field field-'.$this->type.'">';
+    protected function display_field_wrap()
+    {
+        return '<div class="field field-' . $this->type . '">';
     }
 
 
@@ -144,7 +173,7 @@ abstract class BaseType
     {
         echo $this->display_field_wrap();
 
-        if($this->label)
+        if ($this->label)
             echo Markup::tag('label', [
                 'for' => $this->id,
                 'class' => ['field-label', 'field-label-' . $this->type]
@@ -152,7 +181,7 @@ abstract class BaseType
 
         echo $this->field_html();
 
-        if($this->description)
+        if ($this->description)
             echo Markup::tag('p', ['class' => 'description'], $this->description);
 
         echo '</div>';
@@ -164,7 +193,84 @@ abstract class BaseType
      * Generates the actual input HTML tag
      * @return string
      */
-    protected function field_html() {
+    protected function field_html()
+    {
         return Markup::tag('input', $this->field_attr);
+    }
+
+    /**
+     * Adds the default value of this field to the given
+     * array of defaults.
+     *
+     * @param  array $defaults
+     * @return array
+     */
+    public function add_default(&$defaults)
+    {
+
+        $defaults[$this->key] = $this->default;
+
+        return $defaults;
+    }
+
+    /**
+     * Configures the args for the register_meta() call
+     *
+     * @param  array $args
+     * @return array
+     */
+    protected function setup_register_args($args)
+    {
+        // This arg is set at the metabox level, but we
+        // can change it here at the field level if needed.
+        // If the post type does not support revisions, WP
+        // will throw a doing_it_wrong warning.
+        //
+        if (isset($this->revisions_enabled)) {
+            $args['revisions_enabled'] = (bool) $this->revisions_enabled;
+        }
+
+        $args['label'] = !empty($args['label']) ? $args['label'] : $this->label;
+        $args['default'] = !empty($args['default']) ? $args['default'] : $this->default;
+        $args['type'] = !empty($args['type']) ? $args['type'] : 'string';
+        $args['show_in_rest'] = !empty($args['show_in_rest']) ? $args['show_in_rest'] : empty($this->hide_from_rest);
+
+        if (empty($args['default'])) unset($args['default']);
+
+        return $args;
+    }
+
+    /**
+     * Registers this meta field - mainly to enable the field
+     * for the REST API & post revisions.
+     *
+     * @param  string $object_type
+     * @param  string $prefix
+     * @param  array $args
+     * @return bool return value of the register_meta() call
+     */
+    public function register_field($object_type, $prefix, $args = [])
+    {
+
+        $args = $this->setup_register_args($args);
+
+        return $this->register_meta($object_type, "{$prefix}_{$this->key}", $args);
+    }
+
+    protected function register_meta($object_type, $key, $args)
+    {
+        // add_filter('rest_pre_dispatch', function($result, WP_REST_Server $server, WP_REST_Request $request) use($key) {
+        //     $meta = $request->get_param( 'meta' );
+        //     if ($meta && !empty($meta[$key])) {
+        //         // WP core's autosave code sends modified data for some of our meta fields.
+        //         // So we're going to remove that data from the autosave request so that
+        //         // the core code copies our meta data over from the original post.
+        //         unset($meta[$key]);
+        //         $request->set_param('meta', $meta);
+        //     }
+        //     return $result;
+        // }, 10, 3);
+
+        return register_meta($object_type, $key, $args);
     }
 }

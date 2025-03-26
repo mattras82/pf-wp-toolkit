@@ -9,11 +9,12 @@ class MediaType extends ImageType
 
     public function __construct($args)
     {
-        parent::__construct($args);
-
         $this->media_type = isset($args['media_type']) ? $args['media_type'] : 'media';
         $this->media_label = 'Media';
-        if ($this->media_type !== 'media') {
+
+        parent::__construct($args);
+
+        if ($this->media_type !== 'media' && $this->media_label === 'Media') {
             $this->media_label = $this->media_type;
             if (stripos($this->media_label, '/')) {
                 $this->media_label = strtoupper(

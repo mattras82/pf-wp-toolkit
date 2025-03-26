@@ -49,15 +49,17 @@ class CheckboxesType extends BaseType
         $this->set_children();
     }
 
-    protected function set_child_types() {
+    protected function set_child_types()
+    {
         $this->child_type = CheckboxType::class;
         $this->child_input_type = 'checkbox';
     }
 
-    protected function set_children() {
+    protected function set_children()
+    {
         foreach ($this->associativeOptions() as $id => $option) {
             $option['id'] = $id;
-            $option['name'] = $this->name.'[]';
+            $option['name'] = $this->name . ($this->child_input_type === 'checkbox' ? '[]' : '');
             $option['key'] = $this->key;
             $option['type'] = $this->child_input_type;
             $option['default'] = $this->default;
@@ -70,9 +72,8 @@ class CheckboxesType extends BaseType
      */
     public function display($meta)
     {
-        if (is_callable($this->add_callback)) {
-            if (!call_user_func($this->add_callback, $this->callback_args))
-                return '';
+        if (!$this->maybe_show($meta)) {
+            return '';
         }
 
         return $this->display_field($meta);
@@ -89,17 +90,16 @@ class CheckboxesType extends BaseType
         if ($this->label)
             echo Markup::tag('h4', ['class' => ['field-label', 'field-label-' . $this->type]], $this->label);
 
-        if($this->description)
+        if ($this->description)
             echo Markup::tag('p', ['class' => 'description'], $this->description);
 
-        foreach($this->children as $child) {
+        foreach ($this->children as $child) {
             $child->display($meta);
         }
 
         echo '</div>';
 
         return true;
-
     }
 
     /**
@@ -112,9 +112,9 @@ class CheckboxesType extends BaseType
         $output = [];
         $i = 0;
         $associative = array_keys($this->options) !== range(0, count($this->options) - 1);
-        foreach($this->options as $key => $option) {
+        foreach ($this->options as $key => $option) {
             if (is_array($option)) {
-                $output[$this->id.'_'.$i] = $option;
+                $output[$this->id . '_' . $i] = $option;
             } else {
                 $value = [
                     'label' => $option
@@ -122,10 +122,10 @@ class CheckboxesType extends BaseType
                 if ($associative) {
                     $value['value'] = $key;
                 } else {
-                    $value['value'] = 'val_'.$i;
+                    $value['value'] = 'val_' . $i;
                 }
 
-                $output[$this->id.'_'.$i] = $value;
+                $output[$this->id . '_' . $i] = $value;
             }
             $i++;
         }
@@ -133,4 +133,30 @@ class CheckboxesType extends BaseType
         return $output;
     }
 
+    /**
+     * @inheritdoc
+     */
+    protected function setup_register_args($args)
+    {
+        if ($this->child_input_type === 'checkbox') {
+            $args['type'] = 'array';
+            $args['default'] = (array) $this->default;
+
+            if (empty($this->hide_from_rest)) {
+                $args['show_in_rest'] = [
+                    'schema'    => [
+                        'items' => [
+                            'type'   => [
+                                'string',
+                                'number',
+                                'boolean'
+                            ]
+                        ]
+                    ]
+                ];
+            }
+        }
+
+        return parent::setup_register_args($args);
+    }
 }
