@@ -74,7 +74,7 @@ function refreshMetabox(container, action, formData, callback = null) {
         meta_wysiwyg();
         meta_upload();
         addListeners();
-        container.dispatchEvent(
+        container.get(0).dispatchEvent(
           new CustomEvent("pf-metabox-refresh", { bubbles: true })
         );
         if (callback && typeof callback === "function") {
