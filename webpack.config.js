@@ -1,40 +1,10 @@
-// module.exports = (env, argv) => {
-//   const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
-//   const LastCallPlugin = require(`last-call-webpack-plugin`);
-//   if (env.build === 'theme') {
-//     return {
-//       entry: {
-//         'theme': './_src/scripts/lazy-media.js'
-//       },
-//       output: {
-//         // Rename output
-//         filename: 'lazy-media.js'
-//       },
-//       plugins: [
-//         // Extract CSS into renamed CSS file
-//         new MiniCSSExtractPlugin({
-//           filename: 'lazy-media.css'
-//         }),
-//         // Remove the theme.css file from output
-//         new LastCallPlugin({
-//           assetProcessors: [{
-//             regExp: /theme/,
-//             processor: (assetName, asset, assets) => {
-//               assets.setAsset('theme.css', null);
-//               return Promise.resolve();
-//             }
-//           }]
-//         })
-//       ]
-//     }
-//   }
-// };
 const production = process.env.NODE_ENV === "production";
 
 // PLUGINS
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const { merge } = require("webpack-merge");
+const VersionPlugin = require('./build/plugins/version');
 
 module.exports = (env, argv) => {
   const build = [];
@@ -105,6 +75,7 @@ module.exports = (env, argv) => {
       new MiniCssExtractPlugin({
         filename: "[name].css",
       }),
+      new VersionPlugin()
     ],
 
     // Source maps for dev mode
