@@ -259,18 +259,6 @@ abstract class BaseType
 
     protected function register_meta($object_type, $key, $args)
     {
-        // add_filter('rest_pre_dispatch', function($result, WP_REST_Server $server, WP_REST_Request $request) use($key) {
-        //     $meta = $request->get_param( 'meta' );
-        //     if ($meta && !empty($meta[$key])) {
-        //         // WP core's autosave code sends modified data for some of our meta fields.
-        //         // So we're going to remove that data from the autosave request so that
-        //         // the core code copies our meta data over from the original post.
-        //         unset($meta[$key]);
-        //         $request->set_param('meta', $meta);
-        //     }
-        //     return $result;
-        // }, 10, 3);
-
         return register_meta($object_type, $key, $args);
     }
 }

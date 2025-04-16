@@ -181,7 +181,7 @@ class Metabox extends MetaboxAbstract
         $meta = $request->get_param( 'meta' );
         if (is_array($meta)) {
             foreach ($this->defaults as $key => $val) {
-                if (!empty($meta["{$this->metakey}_{$key}"])) {
+                if (isset($meta["{$this->metakey}_{$key}"])) {
                     unset($meta["{$this->metakey}_{$key}"]);
                 }
             }

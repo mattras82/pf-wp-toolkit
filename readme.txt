@@ -1,6 +1,6 @@
 === Public Function WordPress Toolkit Plugin ===
-Tested up to: 6.7.1
-Requires at least: 4.8
+Tested up to: 6.8
+Requires at least: 5.0
 License: GPL-3.0+
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -18,6 +18,16 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 1. Enable plugin under Wordpress Admin
 
 == Changelog ==
+
+= 1.2.0 =
+
+Released on: 16 Apr 2025
+
+ - Enhancement: Adding support revision tracking of Metaboxer fields
+ - Enhancement: Adding support for Metaboxer fields in native REST API
+ - Enhancement: Adding the `pf_meta_field_maybe_show` function & filter for conditional Metaboxer fields
+ - Other: Moved to a custom WebPack build with modern dart-sass implementation
+ - Deprecated: Removing custom lazy loading script now that all supported browsers have native lazy loading
 
 = 1.1.3 =
 

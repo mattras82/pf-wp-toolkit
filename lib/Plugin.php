@@ -53,7 +53,7 @@ class Plugin
                 'short_name' => 'pf-wp-toolkit',
                 'directory' => $_plugin_dir,
                 'path' => $_plugin_path,
-                'version' => '1.2.0-rc',
+                'version' => '1.2.0',
                 'config_path' => $_plugin_path . 'config/',
 
                 // Asset paths and directories
