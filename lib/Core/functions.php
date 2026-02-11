@@ -105,7 +105,7 @@ if (!function_exists('pf_partial')) {
         }
 
         if ($located = pf_get_partial($path, $variant)) {
-            // Keep the same functionality as load_templae
+            // Keep the same functionality as load_template
             global $posts, $post, $wp_did_header, $wp_query,
                    $wp_rewrite, $wpdb, $wp_version, $wp, $id,
                    $comment, $user_ID;
@@ -446,16 +446,6 @@ if (!function_exists('pf_breadcrumb_custom')) {
         </nav>
         <?php
         pf_toolkit('doing_breadcrumb', false);
-    }
-}
-
-if (!function_exists('pf_is_amp_endpoint')) {
-    /**
-     * Check if page requested is an amp page.
-     * @return bool
-     */
-    function pf_is_amp_endpoint() {
-        return function_exists('is_amp_endpoint') && is_amp_endpoint();
     }
 }
 

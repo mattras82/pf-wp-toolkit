@@ -53,7 +53,7 @@ class Plugin
                 'short_name' => 'pf-wp-toolkit',
                 'directory' => $_plugin_dir,
                 'path' => $_plugin_path,
-                'version' => '1.2.0',
+                'version' => '1.2.1',
                 'config_path' => $_plugin_path . 'config/',
 
                 // Asset paths and directories
@@ -161,16 +161,10 @@ class Plugin
                 $assets = new ScriptsAndStyles($c);
                 $assets->admin = true;
 
-                if (version_compare('2.2.0', $this->config['version'], '>=')) {
-                    $assets->style('pf_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.css');
-                    $assets->script('pf_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.js', ['jquery']);
-                    $assets->style('pf_theme_admin', $this->get("theme.assets.dir") . 'admin.css');
-                    $assets->script('pf_theme_admin', $this->get("theme.assets.dir") . 'admin.js', ['jquery']);
-                } else {
-                    // Deprecated as of 1.2.0
-                    $assets->style('pf_admin', $this->theme_or_plugin('assets.dir', 'admin.css'));
-                    $assets->script('pf_admin', $this->theme_or_plugin('assets.dir', 'admin.js'), ['jquery']);
-                }
+                $assets->style('pf_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.css');
+                $assets->script('pf_toolkit_admin', $this->get("plugin.assets.dir") . 'admin.js', ['jquery']);
+                $assets->style('pf_theme_admin', $this->get("theme.assets.dir") . 'admin.css');
+                $assets->script('pf_theme_admin', $this->get("theme.assets.dir") . 'admin.js', ['jquery']);
 
                 return $assets;
             },

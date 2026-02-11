@@ -1,5 +1,5 @@
 === Public Function WordPress Toolkit Plugin ===
-Tested up to: 6.8
+Tested up to: 6.9.1
 Requires at least: 5.0
 License: GPL-3.0+
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
@@ -18,6 +18,14 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 1. Enable plugin under Wordpress Admin
 
 == Changelog ==
+
+= 1.2.1 =
+
+Released on: 11 Feb 2026
+
+ - Enhancement: Enhanced processing of labels for taxonomies & posts in CustomPostTypes
+ - Fix: Fixed issue in async Metabox refresh function where empty checkbox meta was not being deleted
+ - Deprecated: Removed pf_is_amp_endpoint function
 
 = 1.2.0 =
 

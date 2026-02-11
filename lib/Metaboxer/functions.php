@@ -3,7 +3,7 @@
 if (!function_exists('pf_get_meta')) {
     /**
      * @param string $path
-     * @param WP_Post|int|string|null $post
+     * @param WP_Post|WP_Term|int|string|null $post
      * @param string $filter
      * @param string $type
      * @return null|mixed
@@ -64,7 +64,7 @@ if (!function_exists('pf_meta')) {
     /**
      * Wrapper print function for pf_get_meta
      * @param string $path
-     * @param WP_Post|int|string|null $post
+     * @param WP_Post|WP_Term|int|string|null $post
      * @param string $filter
      * @param string $type
      */

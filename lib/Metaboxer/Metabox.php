@@ -415,7 +415,12 @@ class Metabox extends MetaboxAbstract
         if (!empty($object_type)) {
             if ($this->use_single_keys) {
                 foreach ($data as $key => $value) {
-                    update_metadata($object_type, $id, $key, $value);
+                    if ($value === '') {
+                        // Delete empty checkboxes
+                        delete_metadata($object_type, $id, $key);
+                    } else {
+                        update_metadata($object_type, $id, $key, $value);
+                    }
                 }
             } else {
                 update_metadata($object_type, $id, $this->metakey, $data);

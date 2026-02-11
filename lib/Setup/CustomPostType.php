@@ -5,6 +5,8 @@ namespace PublicFunction\Toolkit\Setup;
 use PublicFunction\Toolkit\Core\RunableAbstract;
 use PublicFunction\Toolkit\Core\Container;
 use PublicFunction\Toolkit\Admin\PostsTables;
+use WP_Post;
+use WP_Post_Type;
 
 class CustomPostType extends RunableAbstract
 {
@@ -49,7 +51,6 @@ class CustomPostType extends RunableAbstract
         $this->default_position = 10;
 
         $this->taxonomy_columns = [];
-
     }
 
     protected function get_types()
@@ -136,9 +137,15 @@ class CustomPostType extends RunableAbstract
         $messages[$post_type][10] .= $preview_link;
     }
 
-    private function handleTax($post_key, &$args) {
+    private function handleTax($post_key, &$args)
+    {
         $taxes = [];
         foreach ($args['taxonomies'] as $key => $tax) {
+            if (!empty($tax['hierarchical'])) {
+                add_filter("taxonomy_labels_{$key}", [$this, 'filter_tax_labels_hier']);
+            } else {
+                add_filter("taxonomy_labels_{$key}", [$this, 'filter_tax_labels']);
+            }
             if (!taxonomy_exists($key)) {
                 register_taxonomy($key, $post_key, $tax);
             }
@@ -153,12 +160,42 @@ class CustomPostType extends RunableAbstract
         $args['taxonomies'] = $taxes;
     }
 
-    public function add_taxonomy_filters($post_type, $which) {
+    public function filter_tax_labels($labels, $singular = 'Tag', $plural = 'Tags')
+    {
+        $labels = (array) $labels;
+        $replacements = [
+            $plural     => $labels['name'],
+            $singular   => $labels['singular_name']
+        ];
+        foreach ($replacements as $key => $val) {
+            $replacements[strtolower($key)] = strtolower($val);
+        }
+        foreach ($labels as $key => $label) {
+            if (empty($label) || in_array($key, ['name', 'singular_name'])) continue;
+            $count = 0;
+            foreach ($replacements as $search => $replace) {
+                $labels[$key] = str_replace($search, $replace, $label, $count);
+                // Only replace the first occurence
+                if ($count > 0) {
+                    break;
+                }
+            }
+        }
+        return (object) $labels;
+    }
+
+    public function filter_tax_labels_hier($labels)
+    {
+        return $this->filter_tax_labels($labels, 'Category', 'Categories');
+    }
+
+    public function add_taxonomy_filters($post_type, $which)
+    {
         if ($which === 'top') {
             global $wp_taxonomies;
-            foreach($this->taxonomy_columns as $type => $taxes) {
+            foreach ($this->taxonomy_columns as $type => $taxes) {
                 if ($post_type === $type) {
-                    foreach($taxes as $tax_key) {
+                    foreach ($taxes as $tax_key) {
                         $terms = get_terms([
                             'taxonomy'  => $tax_key
                         ]);
@@ -172,33 +209,35 @@ class CustomPostType extends RunableAbstract
         }
     }
 
-    private function display_taxonomy_filter($tax, $terms) {
+    private function display_taxonomy_filter($tax, $terms)
+    {
         $key = $tax->name;
         $singular = $tax->labels->singular_name;
         $plural = $tax->label;
         $val = isset($_GET[$key]) ? $_GET[$key] : 0;
-        $key_attr = 'filter-by-'.esc_attr($key);
-        ?>
+        $key_attr = 'filter-by-' . esc_attr($key);
+?>
         <label for="<?= $key_attr ?>" class="screen-reader-text"><?= __("Filter by $singular") ?></label>
         <select id="<?= $key_attr ?>" name="<?= esc_attr($key) ?>">
             <option<?php selected($val, 0) ?> value="0"><?= __("All $plural") ?></option>
-            <?php foreach ($terms as $term) {
-                printf(
-                    "<option %s value='%s'>%s</option>\n",
-                    selected($val, $term->slug, false),
-                    esc_attr($term->slug),
-                    __($term->name)
-                );
-            } ?>
+                <?php foreach ($terms as $term) {
+                    printf(
+                        "<option %s value='%s'>%s</option>\n",
+                        selected($val, $term->slug, false),
+                        esc_attr($term->slug),
+                        __($term->name)
+                    );
+                } ?>
         </select>
-        <?php
+<?php
     }
 
-    private function add_thumbnail_to_admin_table($key) {
+    private function add_thumbnail_to_admin_table($key)
+    {
         if (!$this->admin_extras) {
             $this->admin_extras = new PostsTables($this->container);
         }
-        add_filter('manage_'.$key.'_posts_columns', function($columns) use ($key) {
+        add_filter('manage_' . $key . '_posts_columns', function ($columns) use ($key) {
             $post_object = get_post_type_object($key);
             $featured_label = $post_object->labels->featured_image;
             if (!isset($columns['image'])) {
@@ -246,9 +285,9 @@ class CustomPostType extends RunableAbstract
             $args['plural'] = $plural;
         }
 
-	    if (isset($args['labels'])) {
-		    $args['labels'] = wp_parse_args($args['labels'], $this->get_default_labels($singular, $plural));
-	    }
+        if (isset($args['labels'])) {
+            $args['labels'] = wp_parse_args($args['labels'], $this->get_default_labels($singular, $plural));
+        }
 
         $settings = wp_parse_args($args, $this->get_defaults($singular, $plural, $key));
 
@@ -261,8 +300,15 @@ class CustomPostType extends RunableAbstract
 
         if (!empty($args['labels']) && is_array($args['labels'])) {
             $labels = &$wp_post_types[$key]->labels;
-            foreach ($args['labels'] as $name => $value) {
-                $labels->{$name} = $value;
+            if (!empty($args['labels']['singular_name']) && !empty($args['labels']['name'])) {
+                $labels->singular_name = $args['labels']['singular_name'];
+                $labels->name = $args['labels']['name'];
+                $singular = $wp_post_types[$key]->hierarchical ? 'Page' : 'Post';
+                $labels = $this->filter_tax_labels($labels, $singular, $singular.'s');
+            } else {
+                foreach ($args['labels'] as $name => $value) {
+                    $labels->{$name} = $value;
+                }
             }
             unset($args['labels']);
         }
@@ -304,5 +350,4 @@ class CustomPostType extends RunableAbstract
         $this->loader()->addFilter('post_updated_messages', [$this, 'custom_messages']);
         $this->loader()->addAction('restrict_manage_posts', [$this, 'add_taxonomy_filters'], 20, 2);
     }
-
 }
