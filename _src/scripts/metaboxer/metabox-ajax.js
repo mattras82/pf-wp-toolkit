@@ -4,7 +4,7 @@ import meta_wysiwyg from "./metabox-wysiwyg";
 import { reInitWysiwyg, getWysiwygIDs } from "./metabox-wysiwyg";
 import meta_upload from "./metabox-upload";
 
-function refresh(container) {
+function refresh(container, callback = null) {
   let box = container.find(".pf-metabox");
   let metakey = box.data("pf-metakey");
   let action = `${metakey}_refresh`;
@@ -46,6 +46,9 @@ function refresh(container) {
           reInitWysiwyg(id, 0, init);
         });
       }
+    }
+    if (callback && typeof callback === "function") {
+      return callback();
     }
     return true;
   });
@@ -113,7 +116,17 @@ $(function () {
     num++;
     $("#" + id).val(num);
     let container = $(this).parentsUntil(".inside").parent(".inside");
-    refresh(container);
+    refresh(container, function() {
+      // Tab indices are zero-based
+      let tab_id = `#${id}-tab-content-${num-1}`;
+      // Select the new tab
+      $(`a[href="${tab_id}"]`).trigger('click');
+      // Wait for the tab to activate, then
+      // put focus in the first input
+      setTimeout(() => {
+        $(tab_id).find('input').get(0).focus();
+      }, 500);
+    });
   });
 
   //Removes a panel from a gallery and resets the indices of all remaining panels

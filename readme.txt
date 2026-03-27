@@ -1,5 +1,5 @@
 === Public Function WordPress Toolkit Plugin ===
-Tested up to: 6.9.1
+Tested up to: 6.9.4
 Requires at least: 5.0
 License: GPL-3.0+
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
@@ -18,6 +18,12 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 1. Enable plugin under Wordpress Admin
 
 == Changelog ==
+
+= 1.2.2 =
+
+Released on: 27 Mar 2026
+
+ - Enhancement: Auto-selects the new tab & sets focus to the first input when adding a new item in Metaboxer Gallery
 
 = 1.2.1 =
 
