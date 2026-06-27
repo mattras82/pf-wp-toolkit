@@ -174,6 +174,7 @@ class CustomPostType extends RunableAbstract
             if (empty($label) || in_array($key, ['name', 'singular_name'])) continue;
             $count = 0;
             foreach ($replacements as $search => $replace) {
+                if ($label == $replace) break;
                 $labels[$key] = str_replace($search, $replace, $label, $count);
                 // Only replace the first occurence
                 if ($count > 0) {
