@@ -10,6 +10,13 @@
     font-style: italic;
   }
 
+  &-url {
+    &--custom {
+      font-size: 13px;
+      max-width: unset !important;
+    }
+  }
+
   img {
     max-width: 400px;
   }

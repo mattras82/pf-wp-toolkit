@@ -22,6 +22,18 @@ class ImageType extends BaseType
      */
     protected $media_label = 'image';
 
+    /**
+     * If set to true, this options allows the user to manually edit the URL field
+     * @var bool
+     */
+    protected $can_edit_url = false;
+
+    /**
+     * Custom label for the textbox when `can_edit_url` is set to true
+     * @var string
+     */
+    protected $url_edit_label;
+
     public function __construct($args)
     {
         parent::__construct($args);
@@ -57,13 +69,15 @@ class ImageType extends BaseType
 
         echo '<div class="pf-metabox-image'.($image ? ' has-image' : '').'" data-media-type="'.$this->media_type.'">';
 
-        echo Markup::tag('input', [
-            'type' => 'hidden',
-            'id' => $this->id.'_attachment_url',
-            'name' => $this->name,
-            'class' => 'pf-metabox-image-url',
-            'value' => $value['url']
-        ]);
+        if (!$this->can_edit_url) {
+            echo Markup::tag('input', [
+                'type' => 'hidden',
+                'id' => $this->id.'_attachment_url',
+                'name' => $this->name,
+                'class' => 'pf-metabox-image-url',
+                'value' => $value['url']
+            ]);
+        }
 
         echo Markup::tag('input', [
             'type' => 'hidden',
@@ -92,6 +106,23 @@ class ImageType extends BaseType
             'href'  => 'javascript:void(0)',
             'class' => 'pf-metabox-image-change-or-remove'
         ], __($image ? 'Remove '.$this->media_label : 'Add '.$this->media_label, pf_toolkit('textdomain')));
+
+        if ($this->can_edit_url) {
+            echo '<div style="margin:1em 0"><strong>-- OR --</strong></div>';
+
+            echo Markup::tag('label', [
+                'for'   => $this->id.'_attachment_url',
+                'class' => 'field-label'
+            ], $this->url_edit_label ?: 'Enter an existing URL for this '.$this->media_label);
+
+            echo Markup::tag('input', [
+                'type' => 'text',
+                'id' => $this->id.'_attachment_url',
+                'name' => $this->name,
+                'class' => 'pf-metabox-image-url pf-metabox-image-url--custom',
+                'value' => $value['url']
+            ]);
+        }
 
         echo '</div>';
 

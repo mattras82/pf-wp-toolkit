@@ -19,6 +19,17 @@ WordPress plugin for adding additional, developer-friendly functionality to a si
 
 == Changelog ==
 
+= 1.2.3 =
+
+Released on: 24 Nov 2026
+
+ - Enhancement: ImageType in Metaboxer now supports a `can_edit_url` flag, which displays the image URL textbox for manual entry outside of WP Media library
+ - Change: Lazyloading the block library styles is now opt-in with the `lazy_block_styles` config flag (it was always on before)
+ - Change: Post type "add" labels follow the current WordPress wording ("Add Post" instead of "Add New")
+ - Fix: Custom taxonomy labels are more reliable
+ - Fix: The `wp_block_library_css` lazyloading has been reworked to prevent errors in the console
+ - Fix: Explicitly nullable `$blocker` parameters for PHP 8.4
+
 = 1.2.2 =
 
 Released on: 27 Mar 2026

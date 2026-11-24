@@ -86,8 +86,8 @@ class CustomPostType extends RunableAbstract
         return [
             'name' => __($plural, pf_toolkit('textdomain')),
             'singular_name' => __($singular, pf_toolkit('textdomain')),
-            'add_new' => __('Add New', pf_toolkit('textdomain')),
-            'add_new_item' => __('Add New ' . $singular, pf_toolkit('textdomain')),
+            'add_new' => __('Add ' . $singular, pf_toolkit('textdomain')),
+            'add_new_item' => __('Add ' . $singular, pf_toolkit('textdomain')),
             'edit_item' => __('Edit ' . $singular, pf_toolkit('textdomain')),
             'new_item' => __('New ' . $singular, pf_toolkit('textdomain')),
             'view_item' => __('View ' . $singular, pf_toolkit('textdomain')),
@@ -141,11 +141,14 @@ class CustomPostType extends RunableAbstract
     {
         $taxes = [];
         foreach ($args['taxonomies'] as $key => $tax) {
-            if (!empty($tax['hierarchical'])) {
-                add_filter("taxonomy_labels_{$key}", [$this, 'filter_tax_labels_hier']);
-            } else {
-                add_filter("taxonomy_labels_{$key}", [$this, 'filter_tax_labels']);
-            }
+            // Labels set in the JSON are kept as they are
+            //
+            $custom = array_keys($tax['labels'] ?? []);
+            add_filter("taxonomy_labels_{$key}", function ($labels) use ($tax, $custom) {
+                return empty($tax['hierarchical'])
+                    ? $this->filter_tax_labels($labels, 'Tag', 'Tags', $custom)
+                    : $this->filter_tax_labels($labels, 'Category', 'Categories', $custom);
+            });
             if (!taxonomy_exists($key)) {
                 register_taxonomy($key, $post_key, $tax);
             }
@@ -160,33 +163,58 @@ class CustomPostType extends RunableAbstract
         $args['taxonomies'] = $taxes;
     }
 
-    public function filter_tax_labels($labels, $singular = 'Tag', $plural = 'Tags')
+    /**
+     * Replaces the generic words in the default labels with the type's own
+     * names, e.g. "Search Categories" becomes "Search News Categories".
+     * Whole words only, in one pass, so a name is never replaced twice.
+     *
+     * @param array|object $labels
+     * @param string $singular
+     * @param string $plural
+     * @param array $skip Label keys to leave alone, e.g. the ones set in the JSON
+     * @return object
+     */
+    public function filter_tax_labels($labels, $singular = 'Tag', $plural = 'Tags', $skip = [])
     {
         $labels = (array) $labels;
-        $replacements = [
-            $plural     => $labels['name'],
-            $singular   => $labels['singular_name']
-        ];
-        foreach ($replacements as $key => $val) {
-            $replacements[strtolower($key)] = strtolower($val);
-        }
-        foreach ($labels as $key => $label) {
-            if (empty($label) || in_array($key, ['name', 'singular_name'])) continue;
-            $count = 0;
-            foreach ($replacements as $search => $replace) {
-                $labels[$key] = str_replace($search, $replace, $label, $count);
-                // Only replace the first occurence
-                if ($count > 0) {
-                    break;
-                }
-            }
-        }
-        return (object) $labels;
-    }
+        $name = $labels['name'];
+        $singular_name = $labels['singular_name'];
 
-    public function filter_tax_labels_hier($labels)
-    {
-        return $this->filter_tax_labels($labels, 'Category', 'Categories');
+        // The names map to themselves, so a label that already has one
+        // (WordPress copies the name into menu_name) is left as it is.
+        //
+        $map = [
+            $plural                     => $name,
+            $singular                   => $singular_name,
+            strtolower($plural)         => strtolower($name),
+            strtolower($singular)       => strtolower($singular_name),
+            $name                       => $name,
+            $singular_name              => $singular_name,
+            strtolower($name)           => strtolower($name),
+            strtolower($singular_name)  => strtolower($singular_name),
+        ];
+
+        // Longest first, so "News Categories" wins over "Categories" and
+        // "Categories" over "Category"
+        //
+        uksort($map, function ($a, $b) {
+            return strlen($b) <=> strlen($a);
+        });
+
+        $pattern = '/\b(' . implode('|', array_map(function ($word) {
+            return preg_quote($word, '/');
+        }, array_keys($map))) . ')\b/';
+
+        $skip = array_merge(['name', 'singular_name'], $skip);
+
+        foreach ($labels as $key => $label) {
+            if (!is_string($label) || $label === '' || in_array($key, $skip)) continue;
+            $labels[$key] = preg_replace_callback($pattern, function ($m) use ($map) {
+                return $map[$m[1]];
+            }, $label);
+        }
+
+        return (object) $labels;
     }
 
     public function add_taxonomy_filters($post_type, $which)

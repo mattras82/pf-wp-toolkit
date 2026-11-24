@@ -53,7 +53,7 @@ class Plugin
                 'short_name' => 'pf-wp-toolkit',
                 'directory' => $_plugin_dir,
                 'path' => $_plugin_path,
-                'version' => '1.2.2',
+                'version' => '1.2.3',
                 'config_path' => $_plugin_path . 'config/',
 
                 // Asset paths and directories
@@ -184,7 +184,8 @@ class Plugin
 		    	'lazy_load' => !isset($this->config['toolkit']) ? false :
 				    (isset($this->config['toolkit']['lazy_load']) ? $this->config['toolkit']['lazy_load'] :
 					    (isset($this->config['toolkit']['lazy_images']) ? $this->config['toolkit']['lazy_images'] : false)
-				    )
+				    ),
+                'lazy_block_styles' => !empty($this->config['lazy_block_styles']) || !empty($this->config['toolkit']['lazy_block_styles'])
 		    ],
 
             'local_development' => function (Container &$c) {
